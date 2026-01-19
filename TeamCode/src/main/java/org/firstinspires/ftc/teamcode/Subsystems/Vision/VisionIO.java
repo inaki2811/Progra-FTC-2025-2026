@@ -15,7 +15,9 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 
 public class VisionIO {
@@ -31,16 +33,18 @@ public class VisionIO {
 
     private List <AprilTagDetection> detectedTags = new ArrayList<>();
     private final Telemetry telemetry;
-
+    private final Deque<Pose2dSimple> history = new ArrayDeque<>();
+    private final int windowSize = 5;   // número de lecturas para promediar
     public VisionIO(HardwareMap hw, ShooterIO shooterIO, Telemetry telemetry) {
         this.shooterIO = shooterIO;
 
         // Camera pose en metros y orientaciones en radianes
-        this.cameraPosition = new Position(DistanceUnit.INCH, 0, 6.5,2 , 0);
+        this.cameraPosition = new Position(DistanceUnit.METER, 0, 0.165, 0.05, 0);
 
         YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.RADIANS, 0, Math.toRadians(-90), 0, 0);
 
         aprilTagProcessor = new AprilTagProcessor.Builder()
+
                 .build();
 
         VisionPortal.Builder builder = new VisionPortal.Builder();
@@ -76,15 +80,29 @@ public class VisionIO {
         double offsetY = cameraPosition.y;
         double offsetX = cameraPosition.x;
 
-        double ry = Math.sin(turretYaw) * offsetY + Math.cos(turretYaw) * offsetY;
         double rx = Math.cos(turretYaw) * offsetX - Math.sin(turretYaw) * offsetY;
+        double ry = Math.sin(turretYaw) * offsetX + Math.cos(turretYaw) * offsetY;
 
         double robotX = camX - rx;
         double robotY = camY - ry;
 
-        double correctedHeading = normalize(camYaw + turretYaw);
+        double correctedHeading;
+        if (Math.abs(shooterIO.getYawVel()) < 0.01) {
+            correctedHeading = normalize(camYaw + turretYaw);
+        } else {
+            correctedHeading = normalize(camYaw);
+        }
+
 
         lastRobotPose = new Pose2dSimple(robotX, robotY, correctedHeading);
+
+        history.addLast(lastRobotPose);
+        if (history.size() > windowSize) {
+            history.removeFirst(); // mantiene tamaño fijo
+        }
+
+        lastRobotPose = averagePose(history);
+
     }
 
     public List<AprilTagDetection> getDetectedTags() {
@@ -133,6 +151,17 @@ public class VisionIO {
         while (a > Math.PI) a -= 2 * Math.PI;
         while (a <= -Math.PI) a += 2 * Math.PI;
         return a;
+    }
+
+    private Pose2dSimple averagePose(Deque<Pose2dSimple> poses) {
+        double sumX = 0, sumY = 0, sumHeading = 0;
+        for (Pose2dSimple p : poses) {
+            sumX += p.x;
+            sumY += p.y;
+            sumHeading += p.heading;
+        }
+        int n = poses.size();
+        return new Pose2dSimple(sumX / n, sumY / n, sumHeading / n);
     }
 
     public static class Pose2dSimple {

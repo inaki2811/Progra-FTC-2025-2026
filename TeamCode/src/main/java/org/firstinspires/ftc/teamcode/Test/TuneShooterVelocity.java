@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.seattlesolvers.solverslib.controller.PIDFController;
+import com.
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @TeleOp(name="TuneShooterVelocity", group="test")
@@ -64,8 +64,8 @@ public class TuneShooterVelocity extends OpMode {
 
         // A → velocity mode
 
-            launcherTop.setPower(power);
-            launcherBottom.setPower(power);
+        launcherTop.setPower(power);
+        launcherBottom.setPower(power);
 
 
         // B → open loop

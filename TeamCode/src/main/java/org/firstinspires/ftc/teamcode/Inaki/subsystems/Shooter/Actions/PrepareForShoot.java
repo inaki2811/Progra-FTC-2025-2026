@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Subsystems.Shooter.Actions;
+package org.firstinspires.ftc.teamcode.Inaki.subsystems.Shooter.Actions;
 
 import androidx.annotation.NonNull;
 
@@ -7,10 +7,9 @@ import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeIO;
-import org.firstinspires.ftc.teamcode.Subsystems.Shooter.ShooterIO;
+import org.firstinspires.ftc.teamcode.Inaki.subsystems.Intake.IntakeIO;
+import org.firstinspires.ftc.teamcode.Inaki.subsystems.Shooter.ShooterIO;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
 
 import java.util.function.Supplier;
 
@@ -82,7 +81,7 @@ public class PrepareForShoot implements Action {
 
         /*if (tagDetection.get() == null) {
             // ---- CÁLCULO DEL YAW---
-            yaw = Math.atan2(distanceWithTargetY.get() * 0.0254,
+             yaw = Math.atan2(distanceWithTargetY.get() * 0.0254,
                     distanceWithTargetX.get() * 0.0254)
                     - botYaw.get();
             distance = Math.sqrt(distanceWithTargetY.get() * 0.0254 * distanceWithTargetY.get() * 0.0254 +
