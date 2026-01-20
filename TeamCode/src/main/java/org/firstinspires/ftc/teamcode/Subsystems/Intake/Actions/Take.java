@@ -25,7 +25,7 @@ public class Take implements Action {
     public boolean run(@NonNull TelemetryPacket packet) {
         io.setPwr(-1);
         hammerShooter.setPosition(1);
-        //io.setBlockState(true);
+        io.setBlockState(true);
 
         if (isFinished()) {
             onEnd();

@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.Inaki.tests;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+
 import org.firstinspires.ftc.teamcode.Inaki.subsystems.Index;
 import org.firstinspires.ftc.teamcode.Inaki.subsystems.Intake.IntakeIO;
 
@@ -10,44 +12,41 @@ import org.firstinspires.ftc.teamcode.Inaki.subsystems.Intake.IntakeIO;
 @TeleOp(name="TestIntakeIndexColor", group="Test")
 public class TestIntakeIndexColor extends OpMode {
     private IntakeIO intakeIO;
-    private Index index;
+
     private boolean indexStopped = false;
+
 
     @Override
     public void init() {
-        intakeIO = new IntakeIO();
-        intakeIO.init(hardwareMap);
-
-        index = new Index();
-        index.init(hardwareMap);
+        intakeIO = new IntakeIO(hardwareMap);
     }
 
     @Override
     public void loop() {
 
         if (!indexStopped) {
-            intakeIO.setVelocity(-400);
-            index.setVelocity(-1);
-            boolean color = index.isBallDetected();
+            intakeIO.setVelIntake(100);
+            intakeIO.setPwrIndex(-1);
+            boolean color = intakeIO.isBallDetected();
             telemetry.addData("Color detectado", color);
 
             if (color) {
-                index.setVelocity(0);
+                intakeIO.setVelIndex(0);
                 indexStopped = true;
 
             }
         } else {
-            intakeIO.setVelocity(-400);
-            index.setVelocity(0);
+            intakeIO.setVelIntake(100);
+            intakeIO.setPwrIntake(0);
 
             if (gamepad1.a) {
                 indexStopped = false;
             }
         }
         if (gamepad1.x){
-            index.setVelocity(0);
+            intakeIO.setVelIntake(0);
             indexStopped = true;
-            intakeIO.setVelocity(0);
+            intakeIO.setVelIndex(0);
             telemetry.addData("Index detenido", indexStopped);
             telemetry.addData("IntakeIO detenido", indexStopped);
             telemetry.update();
@@ -59,7 +58,7 @@ public class TestIntakeIndexColor extends OpMode {
 
     @Override
     public void stop() {
-        intakeIO.setVelocity(0);
-        index.setVelocity(0);
+        intakeIO.setPwrIntake(0);
+        intakeIO.setPwrIndex(0);
     }
 }

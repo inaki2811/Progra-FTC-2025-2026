@@ -6,39 +6,31 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Inaki.subsystems.Intake.IntakeIO;
 
-public class Take implements Action {
+public class Hammer implements Action {
     private final IntakeIO io;
+    private int lastUsedStage = 0;
     private Servo hammerShooter;
+    private ElapsedTime elapsedTime;
+    private boolean initialized = false;
 
-    public Take(IntakeIO io, HardwareMap hardwareMap) {
+    public Hammer(IntakeIO io, HardwareMap hardwareMap) {
         this.io = io;
-        hammerShooter = hardwareMap.get(Servo.class, "hammer");
-        hammerShooter.setPosition(1);
+        hammerShooter = hardwareMap.get(Servo.class, "hammer");hammerShooter.setPosition(1);
 
     }
 
 
     @Override
     public boolean run(@NonNull TelemetryPacket packet) {
-        hammerShooter.setPosition(1);
-
-        if (!io.isBallDetected()){
-            io.setPwrIntake(-6);
-            io.setPwrIndex(-7);
-
-        }else{
-            io.setPwrIntake(-6);
-            io.setPwrIndex(0);
-
+        if (!initialized) {
+            elapsedTime = new ElapsedTime();
+            initialized = true;
         }
-
-
-        if (isFinished()) {
-            onEnd();
-        }
+        hammerShooter.setPosition(0);
 
         return !isFinished();
     }
@@ -48,6 +40,6 @@ public class Take implements Action {
     }
 
     public boolean isFinished() {
-        return false;
+        return elapsedTime.milliseconds() > 1000;
     }
 }

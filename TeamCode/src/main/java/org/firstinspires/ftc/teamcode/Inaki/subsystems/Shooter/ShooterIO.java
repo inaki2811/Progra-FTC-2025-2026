@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Inaki.subsystems.Shooter;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
+
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -100,6 +102,10 @@ public class ShooterIO {
         hood.setPosition(pos);
     }
 
+    public double getHood(){
+        return hood.getPosition();
+    }
+
 
     /// SHOOTER ///
     public void setVel(){
@@ -146,6 +152,8 @@ public class ShooterIO {
     public double getVelocity() {
         return (shooterUp.getVelocity() + shooterDown.getVelocity()) / 2;
     }
-
+    public HardwareMap getHardwareMap() {
+        return hardwareMap;
+    }
 
 }

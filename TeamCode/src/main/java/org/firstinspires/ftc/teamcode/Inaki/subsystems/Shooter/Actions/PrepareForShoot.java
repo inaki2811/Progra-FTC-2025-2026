@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -155,7 +156,7 @@ public class PrepareForShoot implements Action {
         }
 
 
-        io.setPitch(pitch);
+        io.setHood(pitch);
 
         // VELOCIDAD DEL SHOOTER SEGÚN DISTANCIA
 
@@ -196,7 +197,7 @@ public class PrepareForShoot implements Action {
         telemetry.addData("power", yawPower);
         telemetry.addData("desiredShooterYaw", yaw);
         telemetry.addData("desiredShooterVel", PowerShooter);
-        telemetry.addData("vel", io.getVel());
+        telemetry.addData("vel", io.getVelocity());
         telemetry.addData("desiredShooterX", distanceWithTargetX.get());
         telemetry.addData("desiredShooterY", distanceWithTargetY.get());
         // ALEXIS
@@ -207,7 +208,7 @@ public class PrepareForShoot implements Action {
     }
 
     public boolean isFinished() {
-        return Math.abs(io.getVel() - PowerShooter) < 50;
+        return Math.abs(io.getVelocity() - PowerShooter) < 50;
         //return false;
     }
 }

@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 
+import org.firstinspires.ftc.teamcode.Inaki.subsystems.Intake.IntakeIO;
 import org.firstinspires.ftc.teamcode.Inaki.subsystems.Shooter.ShooterIO;
 
 public class SetVel implements Action {
@@ -15,6 +16,7 @@ public class SetVel implements Action {
     public SetVel(ShooterIO io, double vel) {
         this.io = io;
         this.vel = vel;
+
 
     }
 

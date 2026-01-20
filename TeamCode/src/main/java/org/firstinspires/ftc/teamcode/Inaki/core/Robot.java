@@ -6,6 +6,10 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Clase base para gestionar un conjunto de subsistemas.
+ * Permite inicializar, actualizar y detener todos de forma uniforme.
+ */
 public class Robot {
     private final List<Subsystem> subsystems = new ArrayList<>();
     private final Telemetry telemetry;
