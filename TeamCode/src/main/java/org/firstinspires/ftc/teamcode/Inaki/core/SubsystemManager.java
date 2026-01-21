@@ -26,7 +26,7 @@ public class SubsystemManager {
     private RobotState cachedState = null;
 
     private final Telemetry telemetry;
-    private final int allianceMult = -1;
+    // private final int allianceMult = -1;
 
     // Opcional: Referencia a un gestor de visión si lo tienes
     // private final VisionManager vision;
@@ -39,13 +39,17 @@ public class SubsystemManager {
         this.telemetry = telemetry;
     }
 
-    public void scheduleState(RobotState state) {
-        if (state == null) return;
-        stateQueue.add(state);
-    }
+    //public void scheduleState(RobotState state) {
+      //  if (state == null) {
+        //    return;
+        //}
+        //stateQueue.add(state);
+    //}
 
     public void setState(RobotState state) {
-        if (state == null) return;
+        if (state == null) {
+            return;
+        }
         stateQueue.clear();
         stateQueue.add(state);
     }
@@ -54,15 +58,23 @@ public class SubsystemManager {
      * periodic debe recibir el TelemetryPacket por tick (dashboard) y pasar
      * exactame|nte ese packet a las Actions que ejecutamos.
      */
-    public void periodic(MecanumDrive drive, Supplier<AprilTagDetection> tagDetection, TelemetryPacket telemetryPacket, int alianceMult) {
+    public void periodic(MecanumDrive drive, Supplier<AprilTagDetection> tagDetection, TelemetryPacket telemetryPacket, int allianceMulti) {
+
         if (stateQueue.isEmpty()) {
-            scheduleState(RobotState.TRAVEL);
+            cachedState = null;
+            telemetry.addData("State", "NONE");
+            return;
         }
 
         RobotState current = stateQueue.peek();
 
-        distanceWithTargetX(drive, telemetry);
-        distanceWithTargetY(drive, telemetry, alianceMult);
+        if (current == null) {
+            telemetry.addData("State", "NONE");
+            return;
+        }
+
+        double distanceX = distanceWithTargetX(drive, telemetry);
+        double distanceY = distanceWithTargetY(drive, telemetry, allianceMulti);
 
         // Si entramos en un nuevo estado, inicializamos las Actions asociadas UNA VEZ
         if (cachedState != current) {
@@ -72,7 +84,7 @@ public class SubsystemManager {
 
             switch (current) {
                 case TRAVEL:
-                    runningAction = null;
+                    runningAction = packet -> true;
                     break;
 
                 case INTAKE:
@@ -85,7 +97,7 @@ public class SubsystemManager {
                 case SHOOT:
                     runningAction = new SequentialAction(
                             intake.stop(),
-                            shooter.prepareForShoot(() -> distanceWithTargetX(drive, telemetry), () -> distanceWithTargetY(drive, telemetry, alianceMult), drive.localizer.getPose().heading::toDouble, tagDetection, -0.9, telemetry),
+                            shooter.prepareForShoot(() -> distanceX, () -> distanceY, drive.localizer.getPose().heading::toDouble, tagDetection, -0.9, telemetry),
                             intake.hammer()
                     );
                     break;
@@ -98,13 +110,18 @@ public class SubsystemManager {
         }
 
         if (runningAction != null) {
-           runningAction.run(telemetryPacket);
+           boolean finished = runningAction.run(telemetryPacket);
+           if (finished) {
+               stateQueue.poll();
+               runningAction = null;
+               cachedState = null;
+            }
         }
 
         intake.periodic();
         shooter.periodic(telemetry);
 
-        telemetry.addData("State", current.toString());
+        telemetry.addData("State", current.name());
     }
     private double distanceWithTargetX(MecanumDrive drive, Telemetry telemetry) {
         double distance = ((-62 +  14.57) - (drive.localizer.getPose().position.x)) * 0.0254;
