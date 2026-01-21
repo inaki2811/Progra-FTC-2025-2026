@@ -1,15 +1,21 @@
 package org.firstinspires.ftc.teamcode.Inaki.subsystems.Shooter.Actions;
 
+import static android.icu.lang.UProperty.MATH;
+
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.PoseVelocity2d;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Inaki.subsystems.Intake.IntakeIO;
 import org.firstinspires.ftc.teamcode.Inaki.subsystems.Shooter.ShooterIO;
+import org.firstinspires.ftc.teamcode.roadRunner.MecanumDrive;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.function.Supplier;
@@ -17,6 +23,7 @@ import java.util.function.Supplier;
 public class PrepareForShoot implements Action {
     private final ShooterIO io;
     private final IntakeIO intakeIO;
+    private MecanumDrive drive;
 
     private final Supplier<Double> distanceWithTargetX;
     private final Supplier<Double> distanceWithTargetY;
@@ -54,6 +61,7 @@ public class PrepareForShoot implements Action {
         this.distanceWithTargetX = distanceWithTargetX;
         this.distanceWithTargetY = distanceWithTargetY;
         this.botYaw = botYaw;
+        this.drive = new MecanumDrive(io.getHardwareMap(),new Pose2d(drive.localizer.getPose().position.x, drive.localizer.getPose().position.y, drive.localizer.getPose().heading.toDouble()));
 
         this.telemetry = telemetry;
         this.tagDetection = tagDetection;
@@ -75,7 +83,7 @@ public class PrepareForShoot implements Action {
             // finishTemp = new ElapsedTime(); o un reset
 
         }
-        distance = Math.hypot(distanceWithTargetX.get(), distanceWithTargetY.get()) + 0.3;
+        distance = Math.hypot(distanceWithTargetX.get(), distanceWithTargetY.get());
         yaw = Math.atan2(distanceWithTargetY.get(),
                 distanceWithTargetX.get())
                 - botYaw.get();
@@ -140,46 +148,39 @@ public class PrepareForShoot implements Action {
 
         }*/
 
-
-        //1ER RANGO
-        if (distance < 0.96) {
-            pitch = -0.488281 * distance * distance - 0.15625 * distance + 1.1;
-        }
-//2ND RANGO
-        else if (distance >= 0.96 && distance < 2.56) {
-            pitch = -0.279018 * distance * distance + 0.477679 * distance + 0.798571;
-        }
-
-//3ER RANGO
-        else if (distance >= 2.56 && distance <= 3.20) {
-            pitch = -0.298394 * distance * distance + 1.03299 * distance + 0;
+        if (distance < 59.0551) {
+            pitch = -0.0000231316 * Math.pow(distance, 2)
+                    - 0.0111474 * distance
+                    + 1.28786;
+            vel = 300;
+        } else {
+            pitch = -0.0000818672 * Math.pow(distance, 2)
+                    + 0.00602864 * distance
+                    + 0.972094;
+            vel = 400;
         }
 
 
         io.setHood(pitch);
 
-        // VELOCIDAD DEL SHOOTER SEGÚN DISTANCIA
 
-        if (distance < 0.96) {
+        if (Math.abs(yaw) < 60 ){
 
-            PowerShooter = 605;
-            io.setPoint(PowerShooter);
+            io.setYaw(yaw);
 
-        }
-        else if (distance >= 0.96 && distance < 2.56) {
+        }else{
 
-            PowerShooter = 750;
-            io.setPoint(PowerShooter);
+            io.setYaw(0);/*
+            if(Math.abs(yaw) > 60){
+                drive.setDrivePowers(new PoseVelocity2d(new Vector2d(0,0),yaw));
 
-        }
-        else if (distance >= 2.56) {
+                drive.s
 
-            PowerShooter = 820;
-            io.setPoint(PowerShooter);
+            }
+
+            return false;*/
 
         }
-
-        //io.setYaw(yaw);
 
         //ALEXIS
         // usen veloffset

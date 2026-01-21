@@ -23,7 +23,7 @@ public class ShooterSubsystems {
         return new PrepareForShoot(io, distanceWithTargetX, distanceWithTargetY, botYaw, tagDetection, velOffset, telemetry);
     }
 
-    public Action intake() {return new SetVel(io , -500);}
+    public Action intake() {return new SetVel(io , -150);}
 
     public Action stop() {return new SetVel(io, 0);}
 
@@ -36,12 +36,6 @@ public class ShooterSubsystems {
         telemetry.addData("shooterYaw", io.getYaw());
         telemetry.addData("shooterPitch", io.getHood());
         io.setVel();
-        // Soft limit
-       /* if (io.getYaw() >= Math.PI / 2 && io.getYaw() > 0 ||
-                io.getYaw() <= -Math.PI / 2 && io.getYawVel() < 0
-        ) {
-            //io.stopYaw();
-        }*/
 
 
     }

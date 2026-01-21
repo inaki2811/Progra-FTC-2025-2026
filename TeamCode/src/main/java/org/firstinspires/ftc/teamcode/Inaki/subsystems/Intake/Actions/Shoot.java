@@ -20,7 +20,7 @@ public class Shoot implements Action {
 
     public Shoot(IntakeIO io, HardwareMap hardwareMap) {
         this.io = io;
-        hammerShooter = hardwareMap.get(Servo.class, "hammerS");
+        hammerShooter = hardwareMap.get(Servo.class, "hammer");
         hammerShooter.setPosition(1);
     }
 
