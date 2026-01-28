@@ -26,18 +26,18 @@ public class ShooterIO {
             0.015, 0.9, 0.0003, 0
     );
     public ShooterIO(HardwareMap hardwareMap) {
-        this.hardwareMap = hardwareMap;
+            this.hardwareMap = hardwareMap;
 
-        yawMotor = hardwareMap.get(DcMotorEx.class, "shooterYaw");
-        pitchServo = hardwareMap.get(Servo.class, "shooterPitch");
+            yawMotor = hardwareMap.get(DcMotorEx.class, "shooterYaw");
+            pitchServo = hardwareMap.get(Servo.class, "shooterPitch");
 
-        launcherMotorTop = hardwareMap.get(DcMotorEx.class, "launcherTop");
-        launcherMotorBottom = hardwareMap.get(DcMotorEx.class, "launcherBottom");
+            launcherMotorTop = hardwareMap.get(DcMotorEx.class, "launcherTop");
+            launcherMotorBottom = hardwareMap.get(DcMotorEx.class, "launcherBottom");
 
-        yawMotor.setPositionPIDFCoefficients(100);
-        yawMotor.setTargetPositionTolerance(10);
+            yawMotor.setPositionPIDFCoefficients(100);
+            yawMotor.setTargetPositionTolerance(10);
 
-        launcherMotorBottom.setDirection(DcMotorSimple.Direction.REVERSE);
+            launcherMotorBottom.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     public void setYaw(double angle) {

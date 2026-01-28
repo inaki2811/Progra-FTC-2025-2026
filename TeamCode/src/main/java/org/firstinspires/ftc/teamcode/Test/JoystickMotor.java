@@ -13,23 +13,13 @@ import com.seattlesolvers.solverslib.controller.PIDFController;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-@TeleOp(name="TuneShooterVelocity", group="test")
+@TeleOp(name="JoystickMotor", group="test")
 @Config
-public class TuneShooterVelocity extends OpMode {
+public class JoystickMotor extends OpMode {
     private DcMotorEx launcherTop;
     private DcMotorEx launcherBottom;
 
-    public static double vel = 720;
-    public static double openLoopPower = 0.75;
-    private Servo hammerShooter;
 
-    public static PIDFCoefficients shooterCoeffs = new PIDFCoefficients(
-            0.015, 0.9, 0.0003, 0
-    );
-
-    public static double kA = 0.0007;
-
-    public static final PIDFController shooterController = new PIDFController(shooterCoeffs);
 
     Telemetry dashboardTelemetry;
 
@@ -50,36 +40,15 @@ public class TuneShooterVelocity extends OpMode {
     @Override
     public void loop() {
 
-        shooterController.setCoefficients(shooterCoeffs);
+            launcherTop.setPower(-gamepad1.left_stick_y);
+            launcherBottom.setPower(-gamepad1.left_stick_y);
 
-        shooterController.setTolerance(20);
-        shooterController.setSetPoint(vel);
-
-        double currentVelocity = launcherTop.getVelocity();
-
-        double power = (kA * vel) + shooterController.calculate(currentVelocity);
-
-        power = Math.max(-1, Math.min(power, 1));
-
-
-        // A → velocity mode
-
-        launcherTop.setPower(power);
-        launcherBottom.setPower(power);
-
-
-        // B → open loop
-        if (gamepad1.b) {
-            launcherTop.setPower(openLoopPower);
-            launcherBottom.setPower(openLoopPower);
-        }
 
 
         dashboardTelemetry.addData("Velocity in tps launcher top", launcherTop.getVelocity());
         dashboardTelemetry.addData("Velocity in tps launcher bottom", launcherBottom.getVelocity());
-        dashboardTelemetry.addData("power", power);
-        dashboardTelemetry.addData("shooter sepoint", shooterController.getSetPoint());
-        dashboardTelemetry.addData("error", shooterController.getPositionError());
+        dashboardTelemetry.addData("power", launcherBottom.getPower());
+        dashboardTelemetry.addData("power", launcherTop.getPower());
 
         dashboardTelemetry.update();
     }
