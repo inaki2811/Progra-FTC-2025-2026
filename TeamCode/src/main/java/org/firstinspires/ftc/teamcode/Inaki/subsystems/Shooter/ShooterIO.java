@@ -21,7 +21,7 @@ public class ShooterIO {
     private DcMotorEx shooterUp, shooterDown;
     private double targetVelocity = 0.0;
     private static final double VELOCITY_TOLERANCE = 50.0;
-    public static double kA = 0.0007;
+    public static double kV = 0.0007;
     public static double vel = 720;
 
 
@@ -34,15 +34,16 @@ public class ShooterIO {
     private double currentPos = 0.5;
     private double currentAngleDeg = 0.0;
 
+    private double motorPower = 0.0;
 
     ///  HOOD
     private Servo hood;
 
 
-    public static final PIDFController shooterController = new PIDFController(0.09, 0.9, 0.000001, 0.0);
+    private final PIDFController shooterController = new PIDFController(0.09, 0.9, 0.000001, 0.0);
 
     public static PIDFCoefficients shooterCoeffs = new PIDFCoefficients(
-            0.09, 0.9, 0.000001, 0.0
+            0.03, 0.0, 0.000002, 0.0
     );
 
     public  ShooterIO (HardwareMap hwMap) {
@@ -110,21 +111,21 @@ public class ShooterIO {
     /// SHOOTER ///
     public void setVel(){
         shooterController.setCoefficients(shooterCoeffs);
+        shooterController.setTolerance(VELOCITY_TOLERANCE);
+        shooterController.setIntegrationBounds(-0.2, 0.2);
 
-        shooterController.setTolerance(30);
+        double currentVelocity = getVelocity();
+        double targetVelocity = shooterController.getSetPoint();
 
-        double currentVelocity = shooterUp.getVelocity();
+        double batteryVol = hwMap.voltageSensor.iterator().next().getVoltage();
+        double ff = (kV * targetVelocity) * (12.0 / batteryVol);
+        double pid = shooterController.calculate(currentVelocity);
 
-        vel = ( kA * vel) + shooterController.calculate(currentVelocity);
+        motorPower = ff + pid;
+        motorPower = Math.max(-1.0, Math.min(motorPower, 1.0));
 
-        vel = Math.max(-1, Math.min(vel, 1));
-        if(Math.abs(shooterController.getSetPoint()) > 100){
-            shooterUp.setPower(vel);
-            shooterDown.setPower(vel);
-        } else{
-            shooterUp.setPower(0);
-            shooterDown.setPower(0);
-        }
+        shooterUp.setPower(motorPower);
+        shooterDown.setPower(motorPower);
     }
 
     public void setPoint(double setPoint){

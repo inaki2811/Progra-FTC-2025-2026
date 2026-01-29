@@ -12,9 +12,7 @@ public class IntakeIO {
     private ColorRangeSensor sensor;
     public double distance = 7;
 
-
     public IntakeIO(HardwareMap hwMap) {
-
 
         sensor = hwMap.get(ColorRangeSensor.class, "indexSensor");
 
@@ -22,9 +20,6 @@ public class IntakeIO {
         intake.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         index = hwMap.get(DcMotorEx.class, "index");
         index.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-
-
-
 
     }
 
@@ -48,9 +43,7 @@ public class IntakeIO {
         return intake.getVelocity();
     }
 
-
     /// INDEX ///
-
 
     public void setVelIndex(double vel) {
         index.setVelocity(-vel);
@@ -75,7 +68,6 @@ public class IntakeIO {
 
     public boolean isBallDetected() {
         double sensorDistance = sensor.getDistance(DistanceUnit.CM);
-
         return sensorDistance < distance;
     }
 

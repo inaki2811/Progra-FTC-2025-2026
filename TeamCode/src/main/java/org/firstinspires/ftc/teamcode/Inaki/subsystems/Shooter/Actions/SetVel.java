@@ -16,15 +16,12 @@ public class SetVel implements Action {
     public SetVel(ShooterIO io, double vel) {
         this.io = io;
         this.vel = vel;
-
-
     }
 
     @Override
     public boolean run(@NonNull TelemetryPacket packet) {
         io.setPoint(vel);
         io.setVel();
-
         return !isFinished();
     }
 
