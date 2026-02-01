@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter.Actions.PrepareForShoot;
-import org.firstinspires.ftc.teamcode.subsystems.Shooter.Actions.SetVel;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.function.Supplier;
@@ -23,7 +22,7 @@ public class ShooterSubsystems {
         return new PrepareForShoot(io, distanceWithTargetX, distanceWithTargetY, botYaw, tagDetection, velOffset, telemetry);
     }
 
-    public Action intake() {return new SetVel(io , -150);}
+    public Action intake() {return new SetVel(io , -300);}
 
     public Action stop() {return new SetVel(io, 0);}
 

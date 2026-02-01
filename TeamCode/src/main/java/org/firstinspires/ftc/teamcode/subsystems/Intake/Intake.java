@@ -95,7 +95,7 @@ public class Intake {
             if (shooterReady.getAsBoolean() ) {
                 intakeWithIndex();
             } else {
-                intakeWithoutIndex();
+                stopIntake();
             }
             return false;
         };
