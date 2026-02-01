@@ -16,25 +16,22 @@ public class Take implements Action {
     public Take(IntakeIO io, HardwareMap hardwareMap) {
         this.io = io;
         hammerShooter = hardwareMap.get(Servo.class, "hammer");
-        hammerShooter.setPosition(1);
+        hammerShooter.setPosition(0);
 
     }
 
-
     @Override
     public boolean run(@NonNull TelemetryPacket packet) {
-        hammerShooter.setPosition(1);
+        hammerShooter.setPosition(0);
 
         if (!io.isBallDetected()){
-            io.setPwrIntake(-6);
-            io.setPwrIndex(-7);
-
+            io.setPwrIntake(0.01);
+            io.setPwrIndex(0.1);
         }else{
-            io.setPwrIntake(-6);
+            io.setPwrIntake(0.01);
             io.setPwrIndex(0);
 
         }
-
 
         if (isFinished()) {
             onEnd();

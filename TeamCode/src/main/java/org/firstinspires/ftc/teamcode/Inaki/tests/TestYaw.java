@@ -1,12 +1,11 @@
-package org.firstinspires.ftc.teamcode.Inaki.subsystems;
+package org.firstinspires.ftc.teamcode.Inaki.tests;
 
-import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.acmerobotics.dashboard.config.Config;
-import org.firstinspires.ftc.teamcode.Inaki.core.Subsystem;
 
-@Config
-public class Yaw implements Subsystem {
+@TeleOp(name="TestYaw", group="Test")
+public class TestYaw extends OpMode {
     private Servo leftServo, rightServo;
 
     // Posiciones mínimas y máximas (ajustables en Dashboard)
@@ -26,22 +25,26 @@ public class Yaw implements Subsystem {
     private double currentPos = 0.5; // centro (frente)
     private double currentAngleDeg = 0.0; // frente = 0°
 
-    public void init(HardwareMap hwMap) {
-        leftServo  = hwMap.get(Servo.class, "yawLeft");
-        rightServo = hwMap.get(Servo.class, "yawRight");
+    @Override
+    public void init() {
+
+        leftServo  = hardwareMap.get(Servo.class, "yawLeft");
+        rightServo = hardwareMap.get(Servo.class, "yawRight");
 
         setTargetAngleDeg(0.0);
     }
 
     @Override
-    public void update() {}
+    public void loop() {
+        double input = gamepad1.right_stick_x;
+        double targetAngle = input * 60; // ±30 grados
 
-    @Override
-    public void stop() {
-        setTargetAngleDeg(0.0);
+        setTargetAngleDeg(targetAngle);
+
+        telemetry.addData("Joystick Input", input);
+        telemetry.update();
     }
 
-    // ----------------- Control por ángulo -----------------
     public void setTargetAngleDeg(double angleDeg) {
         // Limitar al rango físico ±60°
         double clamped = clampAngle(angleDeg);
@@ -54,17 +57,6 @@ public class Yaw implements Subsystem {
         leftServo.setPosition(pos);
         rightServo.setPosition(pos);
     }
-
-    public double getTurretAngleDeg() {
-        return currentAngleDeg;
-    }
-
-    public double getCameraYawRad() {
-        double turretYawRad = Math.toRadians(currentAngleDeg);
-        return turretYawRad * gearRatio + Math.toRadians(mountOffsetCamDeg);
-    }
-
-    // ----------------- Utilidades -----------------
     private double clampAngle(double angleDeg) {
         if (angleDeg > maxAngleDeg) return maxAngleDeg;
         if (angleDeg < -maxAngleDeg) return -maxAngleDeg;
@@ -77,7 +69,8 @@ public class Yaw implements Subsystem {
         return posMin + t * (posMax - posMin);
     }
 
-    public double getLeftServoPos() { return leftServo.getPosition(); }
-    public double getRightServoPos() { return rightServo.getPosition(); }
-    public double getCurrentPos() { return currentPos; }
+    @Override
+    public void stop() {
+        setTargetAngleDeg(0);
+    }
 }

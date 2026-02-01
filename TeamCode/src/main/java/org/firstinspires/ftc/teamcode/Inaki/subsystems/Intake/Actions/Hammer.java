@@ -19,7 +19,7 @@ public class Hammer implements Action {
 
     public Hammer(IntakeIO io, HardwareMap hardwareMap) {
         this.io = io;
-        hammerShooter = hardwareMap.get(Servo.class, "hammer");hammerShooter.setPosition(1);
+        hammerShooter = hardwareMap.get(Servo.class, "hammer");hammerShooter.setPosition(0);
 
     }
 

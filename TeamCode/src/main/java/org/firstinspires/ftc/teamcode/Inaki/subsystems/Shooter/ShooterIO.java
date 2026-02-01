@@ -1,15 +1,13 @@
 package org.firstinspires.ftc.teamcode.Inaki.subsystems.Shooter;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
-
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.seattlesolvers.solverslib.controller.PIDFController;
-import com.acmerobotics.dashboard.config.Config;
 
 @Config
 public class ShooterIO {
@@ -21,8 +19,12 @@ public class ShooterIO {
     private DcMotorEx shooterUp, shooterDown;
     private double targetVelocity = 0.0;
     private static final double VELOCITY_TOLERANCE = 50.0;
-    public static double kV = 0.0007;
-    public static double vel = 720;
+    public static double vel = 0;
+    public static final PIDFController shooterController = new PIDFController(0.09, 0.9, 0.000001, 0.0);
+
+    public static PIDFCoefficients shooterCoeffs = new PIDFCoefficients(
+            1, 10, 0.000001, 0.0
+    );
 
 
 
@@ -34,17 +36,12 @@ public class ShooterIO {
     private double currentPos = 0.5;
     private double currentAngleDeg = 0.0;
 
-    private double motorPower = 0.0;
 
     ///  HOOD
     private Servo hood;
 
 
-    private final PIDFController shooterController = new PIDFController(0.09, 0.9, 0.000001, 0.0);
 
-    public static PIDFCoefficients shooterCoeffs = new PIDFCoefficients(
-            0.03, 0.0, 0.000002, 0.0
-    );
 
     public  ShooterIO (HardwareMap hwMap) {
         this.hwMap = hwMap;
@@ -52,9 +49,10 @@ public class ShooterIO {
         ///Shooter
         shooterUp   = hwMap.get(DcMotorEx.class, "launcherTop");
         shooterDown = hwMap.get(DcMotorEx.class, "launcherBottom");
+        shooterUp.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, shooterCoeffs);
+        shooterDown.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, shooterCoeffs);
         shooterDown.setDirection(DcMotorSimple.Direction.REVERSE);
-        shooterUp.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        shooterDown.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+
 
         ///Yaw
         leftServo  = hwMap.get(Servo.class, "yawLeft");
@@ -111,26 +109,18 @@ public class ShooterIO {
     /// SHOOTER ///
     public void setVel(){
         shooterController.setCoefficients(shooterCoeffs);
-        shooterController.setTolerance(VELOCITY_TOLERANCE);
-        shooterController.setIntegrationBounds(-0.2, 0.2);
 
-        double currentVelocity = getVelocity();
-        double targetVelocity = shooterController.getSetPoint();
 
-        double batteryVol = hwMap.voltageSensor.iterator().next().getVoltage();
-        double ff = (kV * targetVelocity) * (12.0 / batteryVol);
-        double pid = shooterController.calculate(currentVelocity);
 
-        motorPower = ff + pid;
-        motorPower = Math.max(-1.0, Math.min(motorPower, 1.0));
+        shooterUp.setVelocity(vel);
+        shooterDown.setVelocity(vel);
 
-        shooterUp.setPower(motorPower);
-        shooterDown.setPower(motorPower);
+
     }
 
     public void setPoint(double setPoint){
-        shooterController.setSetPoint(setPoint);
-    }
+        vel = setPoint;
+        }
 
     public void setPower(double power) {
         shooterDown.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -154,7 +144,7 @@ public class ShooterIO {
         return (shooterUp.getVelocity() + shooterDown.getVelocity()) / 2;
     }
     public HardwareMap getHardwareMap() {
-        return hardwareMap;
+        return hwMap;
     }
 
 }

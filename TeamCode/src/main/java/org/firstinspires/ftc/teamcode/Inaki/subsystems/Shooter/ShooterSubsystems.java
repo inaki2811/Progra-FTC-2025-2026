@@ -37,6 +37,7 @@ public class ShooterSubsystems {
         telemetry.addData("shooterPitch", io.getHood());
         io.setVel();
 
+
     }
 
 }

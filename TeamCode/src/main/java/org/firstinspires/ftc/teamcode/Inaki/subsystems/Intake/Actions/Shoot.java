@@ -32,14 +32,9 @@ public class Shoot implements Action {
                 elapsedTime.reset();
             }
         } else {
-            if (elapsedTime.milliseconds() < 50) {
+            if (elapsedTime.milliseconds() < 2000) {
                 io.setPwrIndex(1);
                 io.setPwrIntake(1);
-            } else if (elapsedTime.milliseconds() < 750) {
-                io.setPwrIndex(1);
-                io.setPwrIntake(1);
-                hammerShooter.setPosition(0);
-
             } else {
                 io.setPwrIndex(0);
                 io.setPwrIndex(0);

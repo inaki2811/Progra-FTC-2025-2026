@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Inaki.subsystems;
+package org.firstinspires.ftc.teamcode.Inaki.subsystems.Vision;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 

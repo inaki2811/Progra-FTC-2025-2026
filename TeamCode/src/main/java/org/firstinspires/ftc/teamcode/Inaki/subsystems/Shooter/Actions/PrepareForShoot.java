@@ -1,21 +1,15 @@
 package org.firstinspires.ftc.teamcode.Inaki.subsystems.Shooter.Actions;
 
-import static android.icu.lang.UProperty.MATH;
-
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.PoseVelocity2d;
-import com.acmerobotics.roadrunner.Vector2d;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Inaki.subsystems.Intake.IntakeIO;
 import org.firstinspires.ftc.teamcode.Inaki.subsystems.Shooter.ShooterIO;
-import org.firstinspires.ftc.teamcode.RoadRunner.MecanumDrive;
+import org.firstinspires.ftc.teamcode.roadRunner.MecanumDrive;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.function.Supplier;
@@ -61,7 +55,6 @@ public class PrepareForShoot implements Action {
         this.distanceWithTargetX = distanceWithTargetX;
         this.distanceWithTargetY = distanceWithTargetY;
         this.botYaw = botYaw;
-        this.drive = new MecanumDrive(io.getHardwareMap(),new Pose2d(drive.localizer.getPose().position.x, drive.localizer.getPose().position.y, drive.localizer.getPose().heading.toDouble()));
 
         this.telemetry = telemetry;
         this.tagDetection = tagDetection;
@@ -73,7 +66,6 @@ public class PrepareForShoot implements Action {
 
     @Override
     public boolean run(@NonNull TelemetryPacket packet) {
-        double yawPower = 0;
 
         if (!initialized) {
             elapsedTime = new ElapsedTime();
@@ -152,35 +144,35 @@ public class PrepareForShoot implements Action {
             pitch = -0.0000231316 * Math.pow(distance, 2)
                     - 0.0111474 * distance
                     + 1.28786;
-            vel = 300;
+
+
         } else {
             pitch = -0.0000818672 * Math.pow(distance, 2)
                     + 0.00602864 * distance
                     + 0.972094;
-            vel = 400;
+
+
         }
+
+
+        if (distance < 59.0551) {
+            PowerShooter = 600;
+        } else {
+            PowerShooter = 700;
+
+        }
+
+        io.setPoint(PowerShooter);
+
+
+
+            io.setYaw(yaw);
+
 
 
         io.setHood(pitch);
 
 
-        if (Math.abs(yaw) < 60 ){
-
-            io.setYaw(yaw);
-
-        }else{
-
-            io.setYaw(0);/*
-            if(Math.abs(yaw) > 60){
-                drive.setDrivePowers(new PoseVelocity2d(new Vector2d(0,0),yaw));
-
-                drive.s
-
-            }
-
-            return false;*/
-
-        }
 
         //ALEXIS
         // usen veloffset
@@ -195,7 +187,6 @@ public class PrepareForShoot implements Action {
         telemetry.addData("desiredShooterPitch", pitch);
         telemetry.addData("errorShooter", lastError);
         telemetry.addData("distance", distance);
-        telemetry.addData("power", yawPower);
         telemetry.addData("desiredShooterYaw", yaw);
         telemetry.addData("desiredShooterVel", PowerShooter);
         telemetry.addData("vel", io.getVelocity());

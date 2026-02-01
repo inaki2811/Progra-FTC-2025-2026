@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Inaki.subsystems.Intake;
 import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -12,14 +13,21 @@ public class IntakeIO {
     private ColorRangeSensor sensor;
     public double distance = 7;
 
+
     public IntakeIO(HardwareMap hwMap) {
+
 
         sensor = hwMap.get(ColorRangeSensor.class, "indexSensor");
 
         intake = hwMap.get(DcMotorEx.class, "intake");
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
         intake.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         index = hwMap.get(DcMotorEx.class, "index");
         index.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        index.setDirection(DcMotorSimple.Direction.REVERSE);
+
+
+
 
     }
 
@@ -42,6 +50,7 @@ public class IntakeIO {
     public double getVelIntake() {
         return intake.getVelocity();
     }
+
 
     /// INDEX ///
 
@@ -68,6 +77,7 @@ public class IntakeIO {
 
     public boolean isBallDetected() {
         double sensorDistance = sensor.getDistance(DistanceUnit.CM);
+
         return sensorDistance < distance;
     }
 

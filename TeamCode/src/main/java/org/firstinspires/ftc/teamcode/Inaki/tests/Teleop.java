@@ -6,18 +6,17 @@ import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Inaki.core.RobotState;
 import org.firstinspires.ftc.teamcode.Inaki.core.SubsystemManager;
 import org.firstinspires.ftc.teamcode.Inaki.subsystems.Intake.IntakeIO;
 import org.firstinspires.ftc.teamcode.Inaki.subsystems.Shooter.ShooterIO;
-import org.firstinspires.ftc.teamcode.Inaki.subsystems.VisionIO;
-import org.firstinspires.ftc.teamcode.RoadRunner.MecanumDrive;
+import org.firstinspires.ftc.teamcode.Inaki.subsystems.Vision.VisionIO;
+import org.firstinspires.ftc.teamcode.roadRunner.MecanumDrive;
 
 
-@TeleOp(name="TeleopBlue", group="Regional")
-public class TeleopBlue extends OpMode {
+@TeleOp(name="Teleop", group="Regional")
+public class Teleop extends OpMode {
 
     private MecanumDrive drive;
     private SubsystemManager subsystemManager;
@@ -34,7 +33,6 @@ public class TeleopBlue extends OpMode {
     private boolean initialPoseSet = false;
 
     private boolean allianceDecided = false;
-    private Servo hammerShooter;
 
 
 
@@ -49,7 +47,6 @@ public class TeleopBlue extends OpMode {
         vision.resume();
         initialPoseSet = false;
 
-          //muestras
 
         allianceDecided = false;
 

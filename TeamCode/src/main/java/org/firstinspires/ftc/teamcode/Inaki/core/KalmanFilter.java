@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Inaki.subsystems;
+package org.firstinspires.ftc.teamcode.Inaki.core;
 
 import com.acmerobotics.roadrunner.Pose2d;
 
