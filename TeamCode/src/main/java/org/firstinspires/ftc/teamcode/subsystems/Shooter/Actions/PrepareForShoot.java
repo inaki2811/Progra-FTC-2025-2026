@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.subsystems.Intake.IntakeIO;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter.ShooterIO;
-import org.firstinspires.ftc.teamcode.roadRunner.MecanumDrive;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.function.Supplier;
@@ -17,7 +16,6 @@ import java.util.function.Supplier;
 public class PrepareForShoot implements Action {
     private final ShooterIO io;
     private final IntakeIO intakeIO;
-    private MecanumDrive drive;
 
     private final Supplier<Double> distanceWithTargetX;
     private final Supplier<Double> distanceWithTargetY;

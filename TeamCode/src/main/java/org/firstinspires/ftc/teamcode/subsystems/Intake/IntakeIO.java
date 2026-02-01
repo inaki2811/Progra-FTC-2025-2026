@@ -1,76 +1,73 @@
 package org.firstinspires.ftc.teamcode.subsystems.Intake;
 
+import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 public class IntakeIO {
-    private final DigitalChannel stage1LimitSwitch;
-    private final DigitalChannel stage2LimitSwitch;
-    private final DigitalChannel stage3LimitSwitch;
-    private final DcMotorEx motor;
-    private final Servo blockerL;
-    private final Servo blockerR;
+    private ColorRangeSensor sensor;
+    private final DcMotorEx intake, index;
+
 
     public IntakeIO(HardwareMap hardwareMap) {
-        stage1LimitSwitch = hardwareMap.get(DigitalChannel.class, "stage1");
-        stage2LimitSwitch = hardwareMap.get(DigitalChannel.class, "stage2");
-        stage3LimitSwitch = hardwareMap.get(DigitalChannel.class, "stage3");
+        sensor = hardwareMap.get(ColorRangeSensor.class, "indexSensor");
 
-        blockerL = hardwareMap.get(Servo.class, "blockerL");
-        blockerR = hardwareMap.get(Servo.class, "blockerR");
-
-        motor = hardwareMap.get(DcMotorEx.class, "intake");
+        intake = hardwareMap.get(DcMotorEx.class, "intake");
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
+        intake.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        index = hardwareMap.get(DcMotorEx.class, "index");
+        index.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        index.setDirection(DcMotorSimple.Direction.REVERSE);
+    }
+    public void setVelIntake(double vel) {
+        intake.setVelocity(-vel);
     }
 
-    public void setVel(double vel) {
-        motor.setVelocity(-vel);
+    public void setPwrIntake(double power) {
+        intake.setPower(power);
     }
 
-    public void setPwr(double power) {
-        motor.setPower(power);
+    public void setPositionIntake(double position){
+        intake.setTargetPosition((int)Math.round(position));
+        intake.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        intake.setPower(1);
     }
 
-    public void setBlockState(boolean block) {
-        if (block) {
-            blockerL.setPosition(0.5);
-            blockerR.setPosition(0.5);
-
-            return;
-        }
-        blockerL.setPosition(1);
-        blockerR.setPosition(1);
+    public double getVelIntake() {
+        return intake.getVelocity();
     }
 
-    public void setPosition(double position) {
-        motor.setTargetPosition((int) Math.round(position));
-        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motor.setPower(1);
+
+    /// INDEX ///
+
+    public void setVelIndex(double vel) {
+        index.setVelocity(-vel);
     }
 
-    public boolean onStage1() {
-        return stage1LimitSwitch.getState();
+    public void setPwrIndex(double power) {
+        index.setPower(power);
     }
 
-    public boolean onStage2() {
-        return stage2LimitSwitch.getState();
+    public void setPositionIndex(double position){
+        index.setTargetPosition((int)Math.round(position));
+        index.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        index.setPower(1);
     }
 
-    public boolean onStage3() {
-        return stage3LimitSwitch.getState();
+    public double getVelIndex() {
+        return index.getVelocity();
     }
 
-    public double getVel() {
-        return motor.getVelocity();
-    }
 
-    public double getBlockerLPos() {
-        return blockerL.getPosition();
-    }
+    /// SENSOR ///
 
-    public double getBlockerRPos() {
-        return blockerR.getPosition();
-    }
+    public double getDistanceSensor() { return sensor.getDistance(DistanceUnit.CM);}
+
+
 }

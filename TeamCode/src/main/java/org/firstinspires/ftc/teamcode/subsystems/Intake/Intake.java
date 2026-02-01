@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
 import java.util.function.BooleanSupplier;
 
 public class Intake {
@@ -15,20 +16,28 @@ public class Intake {
 
     // métodos sencillos, come y traga el intake
 
-    public void intake() {
-        io.setPwr(1);
+    public void intakeWithIndex() {
+        io.setPwrIntake(0.6);
+        io.setPwrIndex(0.8);
+    }
+
+    public void intakeWithoutIndex() {
+        io.setPwrIntake(0.4);
+        io.setPwrIndex(0);
     }
 
     public void reverse() {
-        io.setPwr(-1);
+        io.setPwrIntake(-1);
+        io.setPwrIndex(-1);
     }
 
     public void stop() {
-        io.setPwr(0);
+        io.setPwrIntake(0);
+        io.setPwrIndex(0);
     }
 
-    public boolean hasBallReady() {
-        return io.onStage3();
+    public boolean isBallDetected() {
+        return io.getDistanceSensor() < 7;
     }
 
     // acciones para autónomos y road runner, para llamarlas
@@ -36,7 +45,14 @@ public class Intake {
     // intake come
     public Action take() {
         return packet -> {
-            intake();
+
+            if (!isBallDetected()){
+                intakeWithIndex();
+            }else{
+                intakeWithoutIndex();
+
+            }
+
             return false;
         };
     }
@@ -66,21 +82,8 @@ public class Intake {
             @Override
             public boolean run(TelemetryPacket packet) {
 
-                if (!initialized) {
-                    timer.reset();
-                    initialized = true;
-                }
+                    intakeWithIndex();
 
-                if (timer.milliseconds() < 60) {
-                    io.setPwr(1.0);
-                }
-                else if (timer.milliseconds() < 300) {
-                    io.setPwr(-0.6);
-                }
-                else {
-                    io.setPwr(0.0);
-                    timer.reset();
-                }
                 return true;
             }
         };
@@ -89,10 +92,10 @@ public class Intake {
     // shootea cuando ya esta listo el shooter
     public Action shootWhenReady(BooleanSupplier shooterReady) {
         return packet -> {
-            if (shooterReady.getAsBoolean() && hasBallReady()) {
-                io.setPwr(1.0);
+            if (shooterReady.getAsBoolean() ) {
+                intakeWithIndex();
             } else {
-                io.setPwr(0.0);
+                intakeWithoutIndex();
             }
             return false;
         };
