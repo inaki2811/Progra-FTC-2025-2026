@@ -7,8 +7,8 @@ import com.acmerobotics.roadrunner.SequentialAction;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.subsystems.Intake.Intake;
-import org.firstinspires.ftc.teamcode.subsystems.Shooter.ShooterSubsystems;
 import org.firstinspires.ftc.teamcode.RoadRunner.MecanumDrive;
+import org.firstinspires.ftc.teamcode.subsystems.Shooter.Shoot;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -29,7 +29,7 @@ public class SubsystemManager {
     // private final VisionManager vision;
 
     public SubsystemManager(HardwareMap hardwareMap, Telemetry telemetry) {
-        shooter = new ShooterSubsystems(hardwareMap);
+        shooter = new Shoot(hardwareMap);
         intake = new Intake(hardwareMap);
         stateQueue = new LinkedList<>();
         this.telemetry = telemetry;

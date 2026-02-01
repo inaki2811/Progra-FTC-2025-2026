@@ -12,7 +12,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.RoadRunner.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Intake.Intake;
-import org.firstinspires.ftc.teamcode.subsystems.Shooter.ShooterSubsystems;
 import org.firstinspires.ftc.teamcode.subsystems.Vision.VisionIO;
 import java.util.function.Supplier;
 

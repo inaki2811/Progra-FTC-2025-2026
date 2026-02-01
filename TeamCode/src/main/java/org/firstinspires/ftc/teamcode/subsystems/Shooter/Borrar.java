@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.subsystems.Shooter.Actions;
+package org.firstinspires.ftc.teamcode.subsystems.Shooter;
 
 import androidx.annotation.NonNull;
 
@@ -13,7 +13,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.function.Supplier;
 
-public class PrepareForShoot implements Action {
+public class Borrar implements Action {
     private final ShooterIO io;
     private final IntakeIO intakeIO;
 
@@ -47,7 +47,7 @@ public class PrepareForShoot implements Action {
 
 
 
-    public PrepareForShoot(ShooterIO io, Supplier<Double> distanceWithTargetX, Supplier<Double> distanceWithTargetY, Supplier<Double> botYaw, Supplier<AprilTagDetection> tagDetection, double velOffset, Telemetry telemetry) {
+    public Borrar(ShooterIO io, Supplier<Double> distanceWithTargetX, Supplier<Double> distanceWithTargetY, Supplier<Double> botYaw, Supplier<AprilTagDetection> tagDetection, double velOffset, Telemetry telemetry) {
         this.io = io;
         this.intakeIO = new IntakeIO(io.getHardwareMap());
         this.distanceWithTargetX = distanceWithTargetX;
@@ -164,7 +164,7 @@ public class PrepareForShoot implements Action {
 
 
 
-            io.setYaw(yaw);
+        io.setYaw(yaw);
 
 
 
