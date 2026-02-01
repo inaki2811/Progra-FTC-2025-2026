@@ -1,21 +1,16 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Vector2d;
-
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-
 import org.firstinspires.ftc.teamcode.RoadRunner.MecanumDrive;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeSubsystem;
-import org.firstinspires.ftc.teamcode.Subsystems.Shooter.Actions.PrepareForShoot;
-import org.firstinspires.ftc.teamcode.Subsystems.Shooter.ShooterSubsystem;
-import org.firstinspires.ftc.teamcode.Subsystems.Vision.VisionIO;
+import org.firstinspires.ftc.teamcode.subsystems.Intake.Intake;
+import org.firstinspires.ftc.teamcode.subsystems.Shooter.ShooterSubsystems;
+import org.firstinspires.ftc.teamcode.subsystems.Vision.VisionIO;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.function.Supplier;
@@ -40,8 +35,8 @@ public class AutonomousRed extends LinearOpMode {
         MecanumDrive drive = new MecanumDrive(hardwareMap, startPose);
         drive.localizer.setPose(startPose);
 
-        ShooterSubsystem shooter = new ShooterSubsystem(hardwareMap);
-        IntakeSubsystem intake = new IntakeSubsystem(hardwareMap, telemetry);
+        ShooterSubsystems shooter = new ShooterSubsystems(hardwareMap);
+        Intake intake = new Intake(hardwareMap);
 
         vision = new VisionIO(hardwareMap, shooter.getIO(), telemetry);
 
@@ -57,7 +52,7 @@ public class AutonomousRed extends LinearOpMode {
         );
         Action take = intake.take();
         Action shoot = intake.shoot();
-        Action stop = intake.stop();
+        Action stop = intake.stopIntake();
 
         // Construye la acción (trajectory) del robot
         Action traj = drive.actionBuilder(startPose)
@@ -66,10 +61,8 @@ public class AutonomousRed extends LinearOpMode {
                 .stopAndAdd(new SequentialAction(
                         shooter.prepareForShoot(() -> -64 - (drive.localizer.getPose().position.x), () -> ((59 -  (drive.localizer.getPose().position.y))), drive.localizer.getPose().heading::toDouble, () -> tagDetection, 2.5,telemetry),
                         intake.shoot(),
-                        intake.stop(),
-                        shooter.prepareForShoot(() -> -64 - (drive.localizer.getPose().position.x), () -> ((59 -  (drive.localizer.getPose().position.y))), drive.localizer.getPose().heading::toDouble, () -> tagDetection, 0.25, telemetry),
-                        intake.hammer()
-
+                        intake.stopIntake(),
+                        shooter.prepareForShoot(() -> -64 - (drive.localizer.getPose().position.x), () -> ((59 -  (drive.localizer.getPose().position.y))), drive.localizer.getPose().heading::toDouble, () -> tagDetection, 0.25, telemetry)
                 ))
 
                 // PPG
@@ -82,9 +75,8 @@ public class AutonomousRed extends LinearOpMode {
                 .stopAndAdd(new SequentialAction(
                         shooter.prepareForShoot(() -> -64 - (drive.localizer.getPose().position.x), () -> ((59 -  (drive.localizer.getPose().position.y))), drive.localizer.getPose().heading::toDouble, () -> tagDetection, 2.5,telemetry),
                         intake.shoot(),
-                        intake.stop(),
-                        shooter.prepareForShoot(() -> -64 - (drive.localizer.getPose().position.x), () -> ((59 -  (drive.localizer.getPose().position.y))), drive.localizer.getPose().heading::toDouble, () -> tagDetection, -0.9, telemetry),
-                        intake.hammer()
+                        intake.stopIntake(),
+                        shooter.prepareForShoot(() -> -64 - (drive.localizer.getPose().position.x), () -> ((59 -  (drive.localizer.getPose().position.y))), drive.localizer.getPose().heading::toDouble, () -> tagDetection, -0.9, telemetry)
                 ))
 
                 // PGP
@@ -97,9 +89,8 @@ public class AutonomousRed extends LinearOpMode {
                 .stopAndAdd(new SequentialAction(
                         shooter.prepareForShoot(() -> -64 - (drive.localizer.getPose().position.x), () -> ((59 -  (drive.localizer.getPose().position.y))), drive.localizer.getPose().heading::toDouble, () -> tagDetection, 2.5,telemetry),
                         intake.shoot(),
-                        intake.stop(),
-                        shooter.prepareForShoot(() -> -64 - (drive.localizer.getPose().position.x), () -> ((59 -  (drive.localizer.getPose().position.y))), drive.localizer.getPose().heading::toDouble,() ->  tagDetection, 0.25, telemetry),
-                        intake.hammer()
+                        intake.stopIntake(),
+                        shooter.prepareForShoot(() -> -64 - (drive.localizer.getPose().position.x), () -> ((59 -  (drive.localizer.getPose().position.y))), drive.localizer.getPose().heading::toDouble,() ->  tagDetection, 0.25, telemetry)
                 ))
 
                 // GPP
@@ -112,9 +103,8 @@ public class AutonomousRed extends LinearOpMode {
                 .stopAndAdd(new SequentialAction(
                         shooter.prepareForShoot(() -> -64 - (drive.localizer.getPose().position.x), () -> ((59 -  (drive.localizer.getPose().position.y))), drive.localizer.getPose().heading::toDouble, () -> tagDetection, 2.5,telemetry),
                         intake.shoot(),
-                        intake.stop(),
-                        shooter.prepareForShoot(() -> -64 - (drive.localizer.getPose().position.x), () -> ((59 -  (drive.localizer.getPose().position.y))), drive.localizer.getPose().heading::toDouble, () -> tagDetection, 0.25, telemetry),
-                        intake.hammer()
+                        intake.stopIntake(),
+                        shooter.prepareForShoot(() -> -64 - (drive.localizer.getPose().position.x), () -> ((59 -  (drive.localizer.getPose().position.y))), drive.localizer.getPose().heading::toDouble, () -> tagDetection, 0.25, telemetry)
                 ))
 
                 .build();

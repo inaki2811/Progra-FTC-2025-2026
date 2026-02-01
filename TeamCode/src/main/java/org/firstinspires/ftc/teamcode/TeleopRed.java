@@ -7,11 +7,12 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
-
-import org.firstinspires.ftc.teamcode.Subsystems.Vision.AllianceDetector;
-import org.firstinspires.ftc.teamcode.Subsystems.Vision.VisionIO;
-import org.firstinspires.ftc.teamcode.Subsystems.Vision.VisionIO.Pose2dSimple;
-import org.firstinspires.ftc.teamcode.Subsystems.Shooter.ShooterIO;
+import org.firstinspires.ftc.teamcode.core.RobotState;
+import org.firstinspires.ftc.teamcode.core.SubsystemManager;
+import org.firstinspires.ftc.teamcode.subsystems.Vision.AllianceDetector;
+import org.firstinspires.ftc.teamcode.subsystems.Vision.VisionIO;
+import org.firstinspires.ftc.teamcode.subsystems.Vision.VisionIO.Pose2dSimple;
+import org.firstinspires.ftc.teamcode.subsystems.Shooter.ShooterIO;
 
 
 import org.firstinspires.ftc.teamcode.RoadRunner.MecanumDrive;

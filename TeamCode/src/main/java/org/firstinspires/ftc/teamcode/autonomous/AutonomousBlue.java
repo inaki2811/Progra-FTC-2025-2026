@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.autonomous;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
@@ -10,10 +10,11 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import org.firstinspires.ftc.teamcode.RoadRunner.MecanumDrive;
+
 import org.firstinspires.ftc.teamcode.subsystems.Intake.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter.ShooterSubsystems;
 import org.firstinspires.ftc.teamcode.subsystems.Vision.VisionIO;
+import org.firstinspires.ftc.teamcode.RoadRunner.MecanumDrive;
 import java.util.function.Supplier;
 
 @Autonomous(name="AutonomusBlue", group="Testing")
@@ -22,9 +23,7 @@ public class AutonomousBlue extends LinearOpMode {
     private static final double PPG_POS = -11.6;
     private static final double PGP_POS = 12.2;
     private static final double GPP_POS = 36;
-
     public static Supplier<Pose2d> lastPose = () -> new Pose2d(-70, -59,  -Math.PI / 2);
-
     private VisionIO vision;
     private Intake intake;
     private ShooterSubsystems shooter;
@@ -60,7 +59,6 @@ public class AutonomousBlue extends LinearOpMode {
                 .stopAndAdd(new SequentialAction(
                         stop,
                         prepareForShoot
-
                 ))
 
                 .stopAndAdd(new ParallelAction(

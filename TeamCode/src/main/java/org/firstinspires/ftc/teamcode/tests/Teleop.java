@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.tests;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -6,52 +6,46 @@ import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.core.RobotState;
-import org.firstinspires.ftc.teamcode.subsystems.Vision.AllianceDetector;
-import org.firstinspires.ftc.teamcode.subsystems.Vision.VisionIO;
-import org.firstinspires.ftc.teamcode.subsystems.Vision.VisionIO.Pose2dSimple;
-import org.firstinspires.ftc.teamcode.subsystems.Shooter.ShooterIO;
-
-
-import org.firstinspires.ftc.teamcode.RoadRunner.MecanumDrive;
 import org.firstinspires.ftc.teamcode.core.SubsystemManager;
+import org.firstinspires.ftc.teamcode.subsystems.Intake.IntakeIO;
+import org.firstinspires.ftc.teamcode.subsystems.Shooter.ShooterIO;
+import org.firstinspires.ftc.teamcode.subsystems.Vision.VisionIO;
+import org.firstinspires.ftc.teamcode.RoadRunner.MecanumDrive;
 
-@TeleOp(name="TeleopBlue", group="Regional")
-public class TeleopBlue extends OpMode {
+
+@TeleOp(name="Teleop", group="Regional")
+public class Teleop extends OpMode {
 
     private MecanumDrive drive;
     private SubsystemManager subsystemManager;
+
     private boolean alreadyPressedA = false;
     private boolean alreadyPressedB = false;
     private boolean alreadyPressedX = false;
     private boolean alreadyPressedY = false;
+
     private ShooterIO shooter;
+    private IntakeIO intake;
     private VisionIO vision;
+
     private boolean initialPoseSet = false;
-    private AllianceDetector allianceDetector;
+
     private boolean allianceDecided = false;
-    private Servo hammerShooter;
 
 
 
     @Override
     public void init() {
-        hammerShooter = hardwareMap.get(Servo.class, "hammerS");
-        drive = new MecanumDrive(hardwareMap, AutonomousBlue.lastPose.get());
+        drive = new MecanumDrive(hardwareMap, new Pose2d(0,0,0));
         subsystemManager = new SubsystemManager(hardwareMap, telemetry);
-
+        intake = new IntakeIO(hardwareMap);
         shooter = new ShooterIO(hardwareMap);
+
         vision = new VisionIO(hardwareMap, shooter, telemetry);
         vision.resume();
-
         initialPoseSet = false;
 
-        allianceDetector = new AllianceDetector();
-        allianceDetector.fieldCenterY = 0.0;
-
-        allianceDetector.thresholdMeters = 0.3;    // zona segura
-        allianceDetector.maxSamples = 3;           //muestras
 
         allianceDecided = false;
 
@@ -63,11 +57,8 @@ public class TeleopBlue extends OpMode {
 
     @Override
     public void loop() {
-        subsystemManager.periodic(drive, () -> vision.getTagBySpecificId(20), new TelemetryPacket(), -1);
 
-        vision.update();
-        vision.displayDetectionTelemetry(vision.getTagBySpecificId(20));
-        Pose2dSimple vp = vision.getLastRobotPose();
+
         /*
         // === DETECCIÓN DE ALIANZA ===
         if (!allianceDecided){
@@ -82,6 +73,9 @@ public class TeleopBlue extends OpMode {
             }
         }
         */
+
+
+        subsystemManager.periodic(drive,() -> vision.getTagBySpecificId(20), new TelemetryPacket(), -1);
 
         // === LECTURA DE STICKS ===
         double driveY = -gamepad1.left_stick_x;  // Adelante/Atrás
@@ -133,21 +127,17 @@ public class TeleopBlue extends OpMode {
 
 
         // === TELEMETRÍA ===
+        telemetry.addData("Estado:", RobotState.values());
         telemetry.addData("x", pose.position.x);
         telemetry.addData("y", pose.position.y);
-        telemetry.addData("HammerPosition", hammerShooter.getPosition());
         telemetry.addData("heading (deg)", Math.toDegrees(pose.heading.toDouble()));
-        telemetry.addData("alliance", allianceDecided ? allianceDetector.getAlliance().toString() : "pending");
-        telemetry.addData("samples", allianceDetector.getSamples());
-        telemetry.addData("red", allianceDetector.getRedCount());
-        telemetry.addData("blue", allianceDetector.getBlueCount());
+
 
         telemetry.update();
     }
 
     @Override
     public void stop() {
-        try {vision.close();} catch (Exception ignored) {}
         drive.setDrivePowers(new PoseVelocity2d(new Vector2d(0,0), 0));
     }
 }
