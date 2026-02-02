@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.RoadRunner.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Intake.Intake;
+import org.firstinspires.ftc.teamcode.subsystems.Shooter.Shoot;
 import org.firstinspires.ftc.teamcode.subsystems.Vision.VisionIO;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
@@ -34,7 +35,7 @@ public class AutonomousRed extends LinearOpMode {
         MecanumDrive drive = new MecanumDrive(hardwareMap, startPose);
         drive.localizer.setPose(startPose);
 
-        ShooterSubsystems shooter = new ShooterSubsystems(hardwareMap);
+        Shoot shooter = new Shoot(hardwareMap);
         Intake intake = new Intake(hardwareMap);
 
         vision = new VisionIO(hardwareMap, shooter.getIO(), telemetry);

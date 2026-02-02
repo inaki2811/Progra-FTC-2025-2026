@@ -16,8 +16,6 @@ public class Test1Power extends OpMode {
     private DcMotorEx launcherTop;
     private DcMotorEx launcherBottom;
 
-
-
     Telemetry dashboardTelemetry;
 
     @Override

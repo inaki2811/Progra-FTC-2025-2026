@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.seattlesolvers.solverslib.controller.PIDFController;
 
 @Config
 public class ShooterIO {
@@ -19,9 +18,6 @@ public class ShooterIO {
     private DcMotorEx shooterUp, shooterDown;
     private double targetVelocity = 0.0;
     private static final double VELOCITY_TOLERANCE = 50.0;
-    public static double vel = 0;
-    public static final PIDFController shooterController = new PIDFController(0.09, 0.9, 0.000001, 0.0);
-
     public static PIDFCoefficients shooterCoeffs = new PIDFCoefficients(
             1, 10, 0.000001, 0.0
     );
@@ -34,7 +30,6 @@ public class ShooterIO {
     private double currentPos = 0.5;
     private double currentAngleDeg = 0.0;
 
-
     ///  HOOD
     private Servo hood;
 
@@ -44,19 +39,18 @@ public class ShooterIO {
         ///Shooter
         shooterUp   = hwMap.get(DcMotorEx.class, "launcherTop");
         shooterDown = hwMap.get(DcMotorEx.class, "launcherBottom");
+        shooterUp.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shooterDown.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         shooterUp.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, shooterCoeffs);
         shooterDown.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, shooterCoeffs);
         shooterDown.setDirection(DcMotorSimple.Direction.REVERSE);
-
 
         ///Yaw
         leftServo  = hwMap.get(Servo.class, "yawLeft");
         rightServo = hwMap.get(Servo.class, "yawRight");
 
-
         ///Hood
         hood = hwMap.get(Servo.class, "hood");
-
 
     }
 
@@ -103,39 +97,17 @@ public class ShooterIO {
 
     /// SHOOTER ///
     public void setVel(){
-        shooterController.setCoefficients(shooterCoeffs);
-        shooterUp.setVelocity(vel);
-        shooterDown.setVelocity(vel);
+        shooterUp.setVelocity(targetVelocity);
+        shooterDown.setVelocity(targetVelocity);
     }
 
     public void setPoint(double setPoint){
-        vel = setPoint;
         targetVelocity = setPoint;
     }
 
-    public void setPower(double power) {
-        shooterDown.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        shooterUp.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        shooterDown.setDirection(DcMotorSimple.Direction.REVERSE);
-        shooterUp.setPower(power);
-        shooterDown.setPower(power);
-
-    }
-
-    public void setTargetVelocity(double velocity) {
-        this.targetVelocity = velocity;
-    }
-
-    public void setTargetPower(double power) {
-        shooterUp.setPower(power);
-        shooterDown.setPower(power);
-    }
 
     public double getVelocity() {
         return (shooterUp.getVelocity() + shooterDown.getVelocity()) / 2;
-    }
-    public HardwareMap getHardwareMap() {
-        return hwMap;
     }
 
     public boolean atVelocity() {

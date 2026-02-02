@@ -10,97 +10,90 @@ import org.firstinspires.ftc.teamcode.core.RobotState;
 import org.firstinspires.ftc.teamcode.core.SubsystemManager;
 import org.firstinspires.ftc.teamcode.subsystems.Intake.IntakeIO;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter.ShooterIO;
+import org.firstinspires.ftc.teamcode.subsystems.Vision.Alliance;
+import org.firstinspires.ftc.teamcode.subsystems.Vision.AllianceDetector;
 import org.firstinspires.ftc.teamcode.subsystems.Vision.VisionIO;
 import org.firstinspires.ftc.teamcode.RoadRunner.MecanumDrive;
-
 
 @TeleOp(name="Teleop", group="Regional")
 public class Teleop extends OpMode {
 
     private MecanumDrive drive;
     private SubsystemManager subsystemManager;
-
     private boolean alreadyPressedA = false;
     private boolean alreadyPressedB = false;
     private boolean alreadyPressedX = false;
     private boolean alreadyPressedY = false;
-
-    private ShooterIO shooter;
-    private IntakeIO intake;
     private VisionIO vision;
-
-    private boolean initialPoseSet = false;
-
+    private AllianceDetector allianceDetector;
     private boolean allianceDecided = false;
-
-
+    private int allianceMult = -1; // azul = -1, rojo = +1
 
     @Override
     public void init() {
         drive = new MecanumDrive(hardwareMap, new Pose2d(0,0,0));
-        subsystemManager = new SubsystemManager(hardwareMap, telemetry);
-        intake = new IntakeIO(hardwareMap);
-        shooter = new ShooterIO(hardwareMap);
-
-        vision = new VisionIO(hardwareMap, shooter, telemetry);
+        ShooterIO shooterIO = new ShooterIO(hardwareMap);
+        vision = new VisionIO(hardwareMap, shooterIO, telemetry);
+        allianceDetector = new AllianceDetector();
         vision.resume();
-        initialPoseSet = false;
 
+        subsystemManager = new SubsystemManager(hardwareMap, telemetry, drive, () -> vision.getTagBySpecificId(20));
 
-        allianceDecided = false;
-
-        telemetry.addLine("Test RR + Mecanum listo");
-        telemetry.addData("status", "init complete");
+        telemetry.addLine("inicio de teleop");
         telemetry.update();
-
     }
 
     @Override
     public void loop() {
 
-
-        /*
         // === DETECCIÓN DE ALIANZA ===
-        if (!allianceDecided){
-            if (allianceDetector.processPose(vp)){
-                allianceDecided = true;
-                if (vp != null){
-                    drive.localizer.setPose(new Pose2d(vp.x, vp.y, vp.heading));
+
+        vision.update();
+
+        if (!allianceDecided) {
+            VisionIO.Pose2dSimple vp = vision.getLastRobotPose();
+
+            if (allianceDetector.processPose(vp)) {
+                Alliance alliance = allianceDetector.getAlliance();
+
+                if (alliance == Alliance.RED) {
+                    allianceMult = 1;
+                } else if (alliance == Alliance.BLUE) {
+                    allianceMult = -1;
                 }
 
-                try { vision.pause(); } catch (Exception ignored) {}
+                if (vp != null) {
+                    drive.localizer.setPose(
+                            new Pose2d(vp.x, vp.y, vp.heading)
+                    );
+                }
 
+                vision.pause();
+                allianceDecided = true;
             }
         }
-        */
 
+        // === LECTURA DE STICKS y ACTUALIZA POSE===
 
-        subsystemManager.periodic(drive,() -> vision.getTagBySpecificId(20), new TelemetryPacket(), -1);
-
-        // === LECTURA DE STICKS ===
+        drive.updatePoseEstimate();
+        Pose2d pose = drive.localizer.getPose();
         double driveY = -gamepad1.left_stick_x;  // Adelante/Atrás
         double driveX = -gamepad1.left_stick_y;  // Lateral
         double turn   = -gamepad1.right_stick_x; // Rotación
 
-        Pose2d pose = drive.localizer.getPose();
-
-        // === ACTUALIZA POSE ===
-        drive.updatePoseEstimate();
         double heading = -pose.heading.toDouble() - Math.toRadians(180);
 
         // === CONVERSIÓN FIELD ORIENTED ===
+
         double rotatedX = driveX * Math.cos(heading) - driveY * Math.sin(heading);
         double rotatedY = driveX * Math.sin(heading) + driveY * Math.cos(heading);
 
-        // === MOVIMIENTO ===
-        drive.setDrivePowers(new PoseVelocity2d(
-                new Vector2d(rotatedX, rotatedY),
-                turn
-        ));
+        drive.setDrivePowers(new PoseVelocity2d(new Vector2d(rotatedX, rotatedY), turn));
+
+        // === MAQUINA DE ESTADOS ===
 
         if (gamepad2.a && !alreadyPressedA) {
             subsystemManager.setState(RobotState.INTAKE);
-
             alreadyPressedA = true;
         } else {
             alreadyPressedA = false;
@@ -113,7 +106,6 @@ public class Teleop extends OpMode {
             alreadyPressedB = false;
         }
 
-
         if (gamepad2.x && !alreadyPressedX) {
             subsystemManager.setState(RobotState.STOP);
             alreadyPressedX = true;
@@ -125,14 +117,13 @@ public class Teleop extends OpMode {
             drive.localizer.setPose(new Pose2d(-70, -59,  -Math.PI / 2));
         }
 
-
         // === TELEMETRÍA ===
+        telemetry.addData("Alliance decided", allianceDecided);
+        telemetry.addData("Alliance", allianceDetector.getAlliance());
         telemetry.addData("Estado:", RobotState.values());
-        telemetry.addData("x", pose.position.x);
-        telemetry.addData("y", pose.position.y);
-        telemetry.addData("heading (deg)", Math.toDegrees(pose.heading.toDouble()));
-
-
+        telemetry.addData("Pose X", pose.position.x);
+        telemetry.addData("Pose Y", pose.position.y);
+        telemetry.addData("Heading (deg)", Math.toDegrees(pose.heading.toDouble()));
         telemetry.update();
     }
 

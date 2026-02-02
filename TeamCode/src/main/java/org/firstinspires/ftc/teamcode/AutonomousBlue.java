@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.RoadRunner.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Intake.Intake;
+import org.firstinspires.ftc.teamcode.subsystems.Shooter.Shoot;
 import org.firstinspires.ftc.teamcode.subsystems.Vision.VisionIO;
 import java.util.function.Supplier;
 
@@ -26,7 +27,7 @@ public class AutonomousBlue extends LinearOpMode {
 
     private VisionIO vision;
     private Intake intake;
-    private ShooterSubsystems shooter;
+    private Shoot shooter;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -41,7 +42,7 @@ public class AutonomousBlue extends LinearOpMode {
         FtcDashboard dashboard = FtcDashboard.getInstance();
         TelemetryPacket packet = new TelemetryPacket();
 
-        shooter = new ShooterSubsystems(hardwareMap);
+        shooter = new Shoot(hardwareMap);
         intake = new Intake(hardwareMap);
 
         vision = new VisionIO(hardwareMap, shooter.getIO(), telemetry);

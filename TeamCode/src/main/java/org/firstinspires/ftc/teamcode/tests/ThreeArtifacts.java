@@ -21,7 +21,6 @@ public class ThreeArtifacts extends OpMode {
     private DcMotorEx Top, Down, Intake, Index;
     private MecanumDrive drive;
     private Servo hood;
-
     private double pitch;
     public static double distance = 0;
     public static double vel = 720;                 // setpoint (tps)
@@ -49,8 +48,6 @@ public class ThreeArtifacts extends OpMode {
         Top = hardwareMap.get(DcMotorEx.class, "launcherTop");
         Down = hardwareMap.get(DcMotorEx.class, "launcherBottom");
         Top.setDirection(com.qualcomm.robotcore.hardware.DcMotor.Direction.REVERSE);
-
-
 
         // Usamos control por potencia (PID externo) sobre RUN_WITHOUT_ENCODER
         Top.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
@@ -105,8 +102,6 @@ public class ThreeArtifacts extends OpMode {
                 distanceWithTargetX(drive, telemetry),
                 distanceWithTargetY(drive, telemetry, 1)
         );
-
-
 
         // Control PID + feedforward
         // Nota: si la API de PIDFController que usas tiene otro método para calcular la sali

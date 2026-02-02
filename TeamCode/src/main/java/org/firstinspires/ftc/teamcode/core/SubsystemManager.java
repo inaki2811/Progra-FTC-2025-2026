@@ -9,15 +9,16 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.subsystems.Intake.Intake;
 import org.firstinspires.ftc.teamcode.RoadRunner.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter.Shoot;
+import org.firstinspires.ftc.teamcode.subsystems.Shooter.ShooterIO;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.function.Supplier;
 
 public class SubsystemManager {
-    private final ShooterSubsystems shooter;
+    private final Shoot shooter;
     private final Intake intake;
-    private final Queue<RobotState> stateQueue;
+    private final Queue<RobotState> stateQueue = new LinkedList<>();
 
     // Actions activas para el estado actual (no recrear cada tick)
     private Action runningAction = null;
@@ -28,11 +29,16 @@ public class SubsystemManager {
     // Opcional: Referencia a un gestor de visión si lo tienes
     // private final VisionManager vision;
 
-    public SubsystemManager(HardwareMap hardwareMap, Telemetry telemetry) {
-        shooter = new Shoot(hardwareMap);
-        intake = new Intake(hardwareMap);
-        stateQueue = new LinkedList<>();
+    public SubsystemManager(HardwareMap hardwareMap,Telemetry telemetry,MecanumDrive drive,Supplier<AprilTagDetection> tagDetection) {
         this.telemetry = telemetry;
+        ShooterIO shooterIO = new ShooterIO(hardwareMap);
+        intake = new Intake(hardwareMap);
+
+        Supplier<Double> distanceX = () -> ((-62 + 14.57) - drive.localizer.getPose().position.x) * 0.0254;
+        Supplier<Double> distanceY = () -> ((60 + 15.35) * allianceMult - drive.localizer.getPose().position.y) * 0.0254;
+        Supplier<Double> botYaw = () -> drive.localizer.getPose().heading.toDouble();
+
+        shooter = new Shoot(shooterIO,distanceX,distanceY,botYaw,tagDetection,-0.9, telemetry);
     }
 
     public void scheduleState(RobotState state) {
@@ -48,16 +54,13 @@ public class SubsystemManager {
      * periodic debe recibir el TelemetryPacket por tick (dashboard) y pasar
      * exactame|nte ese packet a las Actions que ejecutamos.
      */
-    public void periodic(MecanumDrive drive, Supplier<AprilTagDetection> tagDetection, TelemetryPacket telemetryPacket, int alianceMult) {
+    public void periodic(TelemetryPacket telemetryPacket) {
         if (stateQueue.isEmpty()) {
             telemetry.addData("State", "IDLE");
             return;
         }
 
         RobotState current = stateQueue.peek();
-
-        distanceWithTargetX(drive, telemetry);
-        distanceWithTargetY(drive, telemetry, alianceMult);
 
         // Si entramos en un nuevo estado, inicializamos las Actions asociadas UNA VEZ
         if (cachedState != current) {
@@ -66,29 +69,34 @@ public class SubsystemManager {
             cachedState = current;
 
             switch (current) {
-                case TRAVEL:
-                    runningAction = packet1 -> false;
-                    break;
 
                 case INTAKE:
                     runningAction = new ParallelAction(
-                            intake.take(),
-                            shooter.intake()
+                            intake.take()
                     );
                     break;
 
                 case SHOOT:
                     runningAction = new SequentialAction(
                             intake.stopIntake(),
-                            shooter.prepareForShoot(() -> distanceWithTargetX(drive, telemetry), () -> distanceWithTargetY(drive, telemetry, alianceMult), drive.localizer.getPose().heading::toDouble, tagDetection, -0.9, telemetry),
+                            new ParallelAction(
+                                    shooter.prepareVelocity(),
+                                    shooter.trackingYaw(),
+                                    shooter.trackingHood()
+                            ),
                             intake.shootWhenReady(shooter::atVelocity)
                             );
                     break;
+
                 case STOP:
                     runningAction = new ParallelAction(
                             intake.stopIntake(),
                             shooter.stop()
                     );
+                    break;
+
+                default:
+                    runningAction = packet1 -> true;
             }
         }
 
@@ -101,19 +109,8 @@ public class SubsystemManager {
             }
         }
 
-        shooter.periodic(telemetry);
         telemetry.addData("State", current.name());
     }
-    private double distanceWithTargetX(MecanumDrive drive, Telemetry telemetry) {
-        double distance = ((-62 +  14.57) - (drive.localizer.getPose().position.x)) * 0.0254;
-        telemetry.addData("distance with target X", distance);
-        return distance;
-    }
 
-    private double distanceWithTargetY(MecanumDrive drive, Telemetry telemetry, double allianceMult) {
-        double distance = ((60 + 15.35)  * allianceMult -  (drive.localizer.getPose().position.y)) * 0.0254;
-        telemetry.addData("distance with target Y", distance);
-        return distance;
-    }
 }
 
