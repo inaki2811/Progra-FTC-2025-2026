@@ -24,6 +24,7 @@ public class VisionIO {
     private final AprilTagProcessor aprilTagProcessor;
     private final ShooterIO shooterIO;
 
+    private Alliance alliance = Alliance.ANY;
     private final Position cameraPosition;
 
     private volatile Pose2dSimple lastRobotPose = null;
@@ -64,7 +65,8 @@ public class VisionIO {
 
         if (detectedTags == null || detectedTags.isEmpty()) return;
 
-        AprilTagDetection d = detectedTags.get(0);
+        AprilTagDetection d = getBestAllianceTag();
+        if (d == null || d.robotPose == null) return;
 
         double camX = d.robotPose.getPosition().x;
         double camY = d.robotPose.getPosition().y;
@@ -75,8 +77,8 @@ public class VisionIO {
         double offsetY = cameraPosition.y;
         double offsetX = cameraPosition.x;
 
-        double ry = Math.sin(turretYaw) * offsetY + Math.cos(turretYaw) * offsetY;
         double rx = Math.cos(turretYaw) * offsetX - Math.sin(turretYaw) * offsetY;
+        double ry = Math.sin(turretYaw) * offsetX + Math.cos(turretYaw) * offsetY;
 
         double robotX = camX - rx;
         double robotY = camY - ry;
@@ -141,4 +143,35 @@ public class VisionIO {
         public Pose2dSimple(double x, double y, double heading) { this.x = x; this.y = y; this.heading = heading; }
         @Override public String toString() { return "Pose2dSimple{x=" + x + ", y=" + y + ", heading=" + heading + "}"; }
     }
+
+    public void setAlliance(Alliance alliance) {
+        this.alliance = alliance;
+    }
+
+    private AprilTagDetection getBestAllianceTag() {
+        AprilTagDetection best = null;
+        double bestRange = Double.MAX_VALUE;
+
+        for (AprilTagDetection d : detectedTags) {
+            if (d.metadata == null) continue;
+
+            int id = d.id;
+
+            // Speaker tags (example: adjust if needed)
+            boolean valid =
+                    alliance == Alliance.ANY ||
+                            (alliance == Alliance.RED && id == 24) ||
+                            (alliance == Alliance.BLUE && id == 20);
+
+            if (!valid) continue;
+
+            double range = d.ftcPose.range;
+            if (range < bestRange) {
+                bestRange = range;
+                best = d;
+            }
+        }
+        return best;
+    }
+
 }
