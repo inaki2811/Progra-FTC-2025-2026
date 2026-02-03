@@ -6,6 +6,7 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -25,7 +26,6 @@ public class AutonomousBlue extends LinearOpMode {
     public static Supplier<Pose2d> lastPose = () -> new Pose2d(-70, -59,  -Math.PI / 2);
     private VisionIO vision;
     private Intake intake;
-    private ShooterSubsystems shooter;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -40,87 +40,37 @@ public class AutonomousBlue extends LinearOpMode {
         FtcDashboard dashboard = FtcDashboard.getInstance();
         TelemetryPacket packet = new TelemetryPacket();
 
-        shooter = new ShooterSubsystems(hardwareMap);
         intake = new Intake(hardwareMap);
 
-        vision = new VisionIO(hardwareMap, shooter.getIO(), telemetry);
 
-        Action prepareForShoot = shooter.prepareForShoot(() -> distanceWithTargetX(drive), () -> distanceWithTargetY(-1, drive), drive.localizer.getPose().heading::toDouble, () -> null, -0.9, telemetry);
 
         Action take = intake.take();
         Action shoot = intake.shoot();
         Action stop = intake.stopIntake();
 
         // Construye la acción (trajectory) del robot
-        Action traj = drive.actionBuilder(startPose)
-                .strafeToLinearHeading(new Vector2d(-30, -28), Math.atan2(distanceWithTargetYManual(-1, -28), distanceWithTargetXManual(-30)))
-
-                .stopAndAdd(new SequentialAction(
-                        stop,
-                        prepareForShoot
-                ))
-
-                .stopAndAdd(new ParallelAction(
-                        intake.stopIntake(),
-                        shooter.stop()
-                ))
-                // PPG
-                .strafeToLinearHeading(new Vector2d(PPG_POS, -28 + 3), -Math.PI / 2)
-                .stopAndAdd(new ParallelAction(
-                        intake.take(),
-                        shooter.intake()
-                ))
-                .strafeToLinearHeading(new Vector2d(PPG_POS, -28 + 3 - 18), -Math.PI / 2)
-                .stopAndAdd(stop)
-                .strafeToLinearHeading(new Vector2d(-36.3, -31.5), Math.atan2(distanceWithTargetYManual(-1, -31.5), distanceWithTargetXManual(-36.3)))
-
-                .stopAndAdd(new SequentialAction(
-                        stop,
-                        prepareForShoot
-
-                ))
-
-                // PGP
-                .strafeToLinearHeading(new Vector2d(PGP_POS, -28 + 3), -Math.PI / 2)
-                .stopAndAdd(take)
-                .stopAndAdd(shooter.intake())
-                .strafeToLinearHeading(new Vector2d(PGP_POS, -28 + 3 - 18), -Math.PI / 2)
-                .stopAndAdd(stop)
-                .strafeToLinearHeading(new Vector2d(-7.9, -19.9), Math.atan2(distanceWithTargetYManual(-1, -19.9), distanceWithTargetXManual(-7.9)))
-
-                .stopAndAdd(new SequentialAction(
-                        stop,
-                        prepareForShoot
-
-                ))
-
-                // GPP
-                .strafeToLinearHeading(new Vector2d(GPP_POS, -28 + 3), -Math.PI / 2)
-                .stopAndAdd(take)
-                .stopAndAdd(shooter.intake())
-                .strafeToLinearHeading(new Vector2d(GPP_POS, -28 + 3 - 18), -Math.PI / 2)
-                .stopAndAdd(stop)
-                .strafeToLinearHeading(new Vector2d(54.3, -12.9), Math.atan2(distanceWithTargetYManual(-1, -12.9), distanceWithTargetXManual(54.3)))
-
-                .stopAndAdd(new SequentialAction(
-                        stop,
-                        prepareForShoot
-
-                ))
-
-                .stopAndAdd(new ParallelAction(
-                        intake.stopIntake(),
-                        shooter.stop()
-                ))
-
+        Action traj1 = drive.actionBuilder(startPose)
+                .strafeToLinearHeading(new Vector2d(-13, -22), -Math.PI / 2)
                 .build();
+
+        Action traj2 = drive.actionBuilder(startPose)
+                .strafeToConstantHeading(new Vector2d(-11.6, -50) )
+                .strafeToLinearHeading(new Vector2d(-20,-22), Math.atan2(distanceWithTargetYManual(1,-22),distanceWithTargetXManual(20)))
+                .build();
+
+        Action traj3 = drive.actionBuilder(startPose)
+                .strafeToLinearHeading(new Vector2d(12.2,-22), Math.PI / 2)
+                .strafeToConstantHeading(new Vector2d(12.2, -50))
+                .strafeToLinearHeading(new Vector2d(-20,-22), Math.atan2(distanceWithTargetYManual(1,-22),distanceWithTargetXManual(20)))
+                .build();
+
 
         // Espera al inicio del opmode
         waitForStart();
         if (isStopRequested()) return;
 
         // Ejecuta la acción y actualiza la pose en tiempo real
-        Actions.runBlocking(traj);
+        Actions.runBlocking(new SequentialAction(traj1, traj2, traj3));
     }
 
     private double distanceWithTargetX(MecanumDrive drive) {

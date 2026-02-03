@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.tests;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
@@ -14,7 +15,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Vision.Alliance;
 import org.firstinspires.ftc.teamcode.subsystems.Vision.AllianceDetector;
 import org.firstinspires.ftc.teamcode.subsystems.Vision.VisionIO;
 import org.firstinspires.ftc.teamcode.RoadRunner.MecanumDrive;
-
+@Config
 @TeleOp(name="Teleop", group="Regional")
 public class Teleop extends OpMode {
 
@@ -28,6 +29,11 @@ public class Teleop extends OpMode {
     private AllianceDetector allianceDetector;
     private boolean allianceDecided = false;
     private int allianceMult = -1; // azul = -1, rojo = +1
+    private ShooterIO shooterIO;
+    private IntakeIO intakeIO;
+
+    public static double intake, index;
+
 
     @Override
     public void init() {
@@ -92,21 +98,21 @@ public class Teleop extends OpMode {
 
         // === MAQUINA DE ESTADOS ===
 
-        if (gamepad2.a && !alreadyPressedA) {
+        if (gamepad1.a && !alreadyPressedA) {
             subsystemManager.setState(RobotState.INTAKE);
             alreadyPressedA = true;
         } else {
             alreadyPressedA = false;
         }
 
-        if (gamepad2.b && !alreadyPressedB) {
+        if (gamepad1.b && !alreadyPressedB) {
             subsystemManager.setState(RobotState.SHOOT);
             alreadyPressedB = true;
         } else {
             alreadyPressedB = false;
         }
 
-        if (gamepad2.x && !alreadyPressedX) {
+        if (gamepad1.x && !alreadyPressedX) {
             subsystemManager.setState(RobotState.STOP);
             alreadyPressedX = true;
         } else {
@@ -115,6 +121,29 @@ public class Teleop extends OpMode {
 
         if (gamepad1.dpad_down) {
             drive.localizer.setPose(new Pose2d(-70, -59,  -Math.PI / 2));
+        }
+
+        if (gamepad1.dpad_left){
+            vision.resume();
+            VisionIO.Pose2dSimple vp = vision.getLastRobotPose();
+
+        } else if (gamepad1.dpad_right) {
+            vision.close();
+
+        }
+
+        if (gamepad1.left_bumper ){
+            shooterIO.setPwr(0);
+        }else if (gamepad1.right_bumper){
+            shooterIO.setPwr(1);
+        }
+
+        if (gamepad1.left_trigger > 0.1){
+            intakeIO.setPwrIntake(intake);
+            intakeIO.setPwrIndex(index);
+        }else if (gamepad1.right_trigger > 0.1){
+            intakeIO.setPwrIntake(0);
+            intakeIO.setPwrIndex(0);
         }
 
         // === TELEMETRÍA ===
@@ -126,6 +155,8 @@ public class Teleop extends OpMode {
         telemetry.addData("Heading (deg)", Math.toDegrees(pose.heading.toDouble()));
         telemetry.update();
     }
+
+
 
     @Override
     public void stop() {

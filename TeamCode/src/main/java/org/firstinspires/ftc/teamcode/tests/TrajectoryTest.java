@@ -1,51 +1,45 @@
-package org.firstinspires.ftc.teamcode.autonomous;
-import androidx.annotation.NonNull;
-
+package org.firstinspires.ftc.teamcode.tests;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.Arclength;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.Pose2dDual;
-import com.acmerobotics.roadrunner.PosePath;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
-import com.acmerobotics.roadrunner.VelConstraint;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.firstinspires.ftc.teamcode.RoadRunner.MecanumDrive;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Config
 @Autonomous(name = "BLUE_TEST_AUTO_PIXEL", group = "Autonomous")
 public class TrajectoryTest extends LinearOpMode {
-
 
     @Override
     public void runOpMode() {
         Pose2d initialPose = new Pose2d(-70+8, -46.6 + 7.4,  -Math.PI / 2);
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
+
         // vision here that outputs position
         int visionOutputPosition = 1;
 
-        TrajectoryActionBuilder firstTrajectory = drive.actionBuilder(initialPose)
-                .strafeToLinearHeading(new Vector2d(-13, -22), -Math.PI / 2);
+        TrajectoryActionBuilder tab1 = drive.actionBuilder(initialPose)
+                .strafeToLinearHeading(new Vector2d(-30, -28), Math.atan2(distanceWithTargetYManual(-1, -28), distanceWithTargetXManual(-30)));
 
-        TrajectoryActionBuilder secondTrajectory = drive.actionBuilder(initialPose)
-                .strafeToConstantHeading(new Vector2d(-11.6, -50) )
-                .strafeToLinearHeading(new Vector2d(-20,-22), Math.atan2(distanceWithTargetYManual(1,-22),distanceWithTargetXManual(20)));
-        TrajectoryActionBuilder third = drive.actionBuilder(initialPose)
-                .strafeToLinearHeading(new Vector2d(12.2,-22), Math.PI / 2)
-                .strafeToConstantHeading(new Vector2d(12.2, -50))
-                .strafeToLinearHeading(new Vector2d(-20,-22), Math.atan2(distanceWithTargetYManual(1,-22),distanceWithTargetXManual(20)));
-
-
-
+        TrajectoryActionBuilder tab2 = drive.actionBuilder(initialPose)
+                .lineToY(37)
+                .setTangent(Math.toRadians(0))
+                .lineToX(18)
+                .waitSeconds(3)
+                .setTangent(Math.toRadians(0))
+                .lineToXSplineHeading(46, Math.toRadians(180))
+                .waitSeconds(3);
+        TrajectoryActionBuilder tab3 = drive.actionBuilder(initialPose)
+                .lineToYSplineHeading(33, Math.toRadians(180))
+                .waitSeconds(2)
+                .strafeTo(new Vector2d(46, 30))
+                .waitSeconds(3);
         Action trajectoryActionCloseOut = tab1.endTrajectory().fresh()
                 .strafeTo(new Vector2d(48, 12))
                 .build();

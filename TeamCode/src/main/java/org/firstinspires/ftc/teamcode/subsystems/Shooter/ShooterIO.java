@@ -114,4 +114,10 @@ public class ShooterIO {
         return Math.abs(getVelocity() - targetVelocity) < VELOCITY_TOLERANCE;
     }
 
+    public void setPwr (double power){
+        shooterUp.setPower(power);
+        shooterDown.setPower(power);
+
+    }
+
 }
