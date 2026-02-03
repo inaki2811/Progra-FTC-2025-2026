@@ -141,7 +141,7 @@ public class Teleop extends OpMode {
         if (gamepad1.left_trigger > 0.1){
             intakeIO.setPwrIntake(intake);
             intakeIO.setPwrIndex(index);
-        }else if (gamepad1.right_trigger > 0.1){
+        }else {
             intakeIO.setPwrIntake(0);
             intakeIO.setPwrIndex(0);
         }

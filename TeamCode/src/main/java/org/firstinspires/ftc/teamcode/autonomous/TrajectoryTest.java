@@ -30,61 +30,32 @@ public class TrajectoryTest extends LinearOpMode {
         Pose2d initialPose = new Pose2d(-70+8, -46.6 + 7.4,  -Math.PI / 2);
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
-        // vision here that outputs position
-        int visionOutputPosition = 1;
-
-        TrajectoryActionBuilder firstTrajectory = drive.actionBuilder(initialPose)
-                .strafeToLinearHeading(new Vector2d(-13, -22), -Math.PI / 2);
-
-        TrajectoryActionBuilder secondTrajectory = drive.actionBuilder(initialPose)
-                .strafeToConstantHeading(new Vector2d(-11.6, -50) )
-                .strafeToLinearHeading(new Vector2d(-20,-22), Math.atan2(distanceWithTargetYManual(1,-22),distanceWithTargetXManual(20)));
-        TrajectoryActionBuilder third = drive.actionBuilder(initialPose)
-                .strafeToLinearHeading(new Vector2d(12.2,-22), Math.PI / 2)
-                .strafeToConstantHeading(new Vector2d(12.2, -50))
-                .strafeToLinearHeading(new Vector2d(-20,-22), Math.atan2(distanceWithTargetYManual(1,-22),distanceWithTargetXManual(20)));
-
-
-
-        Action trajectoryActionCloseOut = tab1.endTrajectory().fresh()
-                .strafeTo(new Vector2d(48, 12))
+        Action traj1 = drive.actionBuilder(initialPose)
+                .strafeToLinearHeading(new Vector2d(-13, -22), -Math.PI / 2)
                 .build();
 
-        // actions that need to happen on init; for instance, a claw tightening.
+        Action traj2 = drive.actionBuilder(initialPose)
+                .strafeToConstantHeading(new Vector2d(-11.6, -50) )
+                .strafeToLinearHeading(new Vector2d(-20,-22), Math.atan2(distanceWithTargetYManual(1,-22),distanceWithTargetXManual(20)))
+                .build();
+
+        Action traj3 = drive.actionBuilder(initialPose)
+                .strafeToLinearHeading(new Vector2d(12.2,-22), Math.PI / 2)
+                .strafeToConstantHeading(new Vector2d(12.2, -50))
+                .strafeToLinearHeading(new Vector2d(-20,-22), Math.atan2(distanceWithTargetYManual(1,-22),distanceWithTargetXManual(20)))
+                .build();
 
 
-        while (!isStopRequested() && !opModeIsActive()) {
-            int position = visionOutputPosition;
-            telemetry.addData("Position during Init", position);
-            telemetry.update();
-        }
-
-        int startPosition = visionOutputPosition;
-        telemetry.addData("Starting Position", startPosition);
-        telemetry.update();
+        // Espera al inicio del opmode
         waitForStart();
-
         if (isStopRequested()) return;
 
-        Action trajectoryActionChosen;
-        if (startPosition == 1) {
-            trajectoryActionChosen = tab1.build();
-        } else if (startPosition == 2) {
-            trajectoryActionChosen = tab2.build();
-        } else {
-            trajectoryActionChosen = tab3.build();
-        }
-
-        Actions.runBlocking(
-                new SequentialAction(
-                        trajectoryActionChosen,
-
-                        trajectoryActionCloseOut
-                )
-        );
-
-
+        // Ejecuta la acción y actualiza la pose en tiempo real
+        Actions.runBlocking(new SequentialAction(traj1, traj2, traj3));
     }
+
+
+
 
     private double distanceWithTargetXManual(double x) {
 
