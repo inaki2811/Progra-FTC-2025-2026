@@ -38,6 +38,7 @@ public class Teleop extends OpMode {
     // Ajustables desde Dashboard
     public static double SHOOT_READY_VEL = 550;
     public static double VEL_TOLERANCE = 20; // Tolerance below target velocity
+    public static double SECOND_BALL_BONUS = 50; // Extra velocity needed for second ball
     public static double MIN_FEED_TIME = 0.3; // Minimum time to ensure ball is fed
     public static int MAX_SHOTS = 3; // Number of balls to shoot
 
@@ -93,7 +94,16 @@ public class Teleop extends OpMode {
         // ================= SHOOT STATE MACHINE =================
 
         double currentVel = shooterIO.getVelocity();
-        double threshold = SHOOT_READY_VEL - VEL_TOLERANCE;
+
+        // Determine threshold based on which ball we're shooting
+        double threshold;
+        if (shotCount == 1) {
+            // Second ball needs higher velocity (target + 30)
+            threshold = SHOOT_READY_VEL + SECOND_BALL_BONUS;
+        } else {
+            // First and third balls use normal threshold (target - 20)
+            threshold = SHOOT_READY_VEL - VEL_TOLERANCE;
+        }
 
         switch (shootState) {
 
@@ -107,7 +117,7 @@ public class Teleop extends OpMode {
                 intakeIO.setPwrIntake(0.0);
                 intakeIO.setPwrIndex(0.0);
 
-                // Wait for velocity to reach threshold (target - 20)
+                // Wait for velocity to reach threshold
                 if (currentVel >= threshold) {
                     feedTimer.reset();
                     shootState = ShootRoutineState.FEEDING;
@@ -160,7 +170,7 @@ public class Teleop extends OpMode {
         telemetry.addData("Shoot State", shootState);
         telemetry.addData("Shot Count", shotCount);
         telemetry.addData("Shooter Vel", currentVel);
-        telemetry.addData("Threshold (Target-20)", threshold);
+        telemetry.addData("Current Threshold", threshold);
         telemetry.addData("Feed Time", feedTimer.seconds());
         telemetry.addData("Shooter On", shooterOn);
         telemetry.update();
