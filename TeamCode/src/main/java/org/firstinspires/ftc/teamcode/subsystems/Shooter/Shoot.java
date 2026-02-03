@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems.Shooter;
 
 import com.acmerobotics.roadrunner.Action;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
@@ -13,114 +12,108 @@ public class Shoot {
     private final Supplier<Double> distanceWithTargetX;
     private final Supplier<Double> distanceWithTargetY;
     private final Supplier<Double> botYaw;
-    private final Telemetry telemetry;
-    private ElapsedTime elapsedTime;
-    private ElapsedTime finishTemp;
-    private boolean initialized  = false;
-    private double distance;
-    private double pitch;
-    private double yaw;
     private final Supplier<AprilTagDetection> tagDetection;
-    private double PowerShooter;
+    private final Telemetry telemetry;
+
+    private double targetVelocity = 0;
     private double velOffset;
 
-    public Shoot(ShooterIO shooterIO, Supplier<Double> distanceWithTargetX, Supplier<Double> distanceWithTargetY, Supplier<Double> botYaw, Supplier<AprilTagDetection> tagDetection, double velOffset, Telemetry telemetry) {
+    public Shoot(
+            ShooterIO shooterIO,
+            Supplier<Double> distanceWithTargetX,
+            Supplier<Double> distanceWithTargetY,
+            Supplier<Double> botYaw,
+            Supplier<AprilTagDetection> tagDetection,
+            double velOffset,
+            Telemetry telemetry
+    ) {
         this.shooterIO = shooterIO;
         this.distanceWithTargetX = distanceWithTargetX;
         this.distanceWithTargetY = distanceWithTargetY;
         this.botYaw = botYaw;
-        this.telemetry = telemetry;
         this.tagDetection = tagDetection;
         this.velOffset = velOffset;
-        finishTemp = new ElapsedTime();
+        this.telemetry = telemetry;
     }
 
-    public void setVel (double velocity){
+    /* ------------------ VELOCITY ------------------ */
+
+    public void setVel(double velocity) {
+        targetVelocity = velocity;
         shooterIO.setPoint(velocity + velOffset);
         shooterIO.setVel();
-
-    }
-
-    public double getDistance(){
-        distance = Math.hypot(distanceWithTargetX.get(), distanceWithTargetY.get());
-        return distance;
-    }
-
-    public Action spinUp(){
-        return packet -> {
-        setVel(300);
-        return false;
-        };
-    }
-
-    public Action stop(){
-        return packet -> {
-        setVel(0);
-        return false;
-        };
     }
 
     public boolean atVelocity() {
-        return shooterIO.atVelocity();
+        return Math.abs(shooterIO.getVelocity() - targetVelocity) < 50;
     }
 
-    public Action prepareVelocity(){
-        return telemetryPacket -> {
-            if (!initialized) {
-                elapsedTime = new ElapsedTime();
-                initialized = true;
-            }
-
-            distance = getDistance();
-
-            if (distance < 59.0551) {
-                PowerShooter = 600;
-            } else {
-                PowerShooter = 700;
-
-            }
-            setVel(PowerShooter);
-            return !isFinished();
-
-        };
-
-
-    }
-
-    public boolean isFinished() {
-        return Math.abs(shooterIO.getVelocity() - PowerShooter) < 50;
-    }
-
-    public Action trackingYaw(){
+    public Action spinUp(double velocity) {
         return packet -> {
-            yaw = Math.atan2(distanceWithTargetY.get(),
-                    distanceWithTargetX.get())
-                    - botYaw.get();
+            setVel(velocity);
+            return true; // acción instantánea
+        };
+    }
+
+    public Action stop() {
+        return packet -> {
+            setVel(0);
+            return true;
+        };
+    }
+
+    public Action prepareVelocity() {
+        return packet -> {
+            double distance = getDistance();
+
+            if (distance < 59.0) {
+                setVel(600);
+            } else {
+                setVel(700);
+            }
+
+            return atVelocity(); // termina cuando ya está listo
+        };
+    }
+
+    /* ------------------ TRACKING ------------------ */
+
+    public Action trackingYaw() {
+        return packet -> {
+            double yaw =
+                    Math.atan2(distanceWithTargetY.get(), distanceWithTargetX.get())
+                            - botYaw.get();
+
             shooterIO.setYaw(yaw);
-            return false;
+            return false; // corre continuamente
         };
     }
 
-    public Action trackingHood(){
+    public Action trackingHood() {
         return packet -> {
+            double distance = getDistance();
+            double pitch;
 
-            distance = getDistance();
-            if (distance < 59.0551) {
-                pitch = -0.0000231316 * Math.pow(distance, 2)
-                        - 0.0111474 * distance
-                        + 1.28786;
-
-
+            if (distance < 59.0) {
+                pitch =
+                        -0.0000231316 * Math.pow(distance, 2)
+                                - 0.0111474 * distance
+                                + 1.28786;
             } else {
-                pitch = -0.0000818672 * Math.pow(distance, 2)
-                        + 0.00602864 * distance
-                        + 0.972094;
+                pitch =
+                        -0.0000818672 * Math.pow(distance, 2)
+                                + 0.00602864 * distance
+                                + 0.972094;
             }
 
             shooterIO.setHood(pitch);
             return false;
         };
-
     }
 
+    /* ------------------ UTILS ------------------ */
+
+    public double getDistance() {
+        return Math.hypot(distanceWithTargetX.get(), distanceWithTargetY.get());
+    }
 }

@@ -20,10 +20,10 @@ public class IntakeIO {
 
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
-        intake.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         index = hardwareMap.get(DcMotorEx.class, "index");
-        index.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         index.setDirection(DcMotorSimple.Direction.REVERSE);
+        intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        index.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
     public void setVelIntake(double vel) {
         intake.setVelocity(-vel);

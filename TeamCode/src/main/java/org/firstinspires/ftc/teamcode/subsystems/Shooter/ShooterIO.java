@@ -11,62 +11,62 @@ import com.qualcomm.robotcore.hardware.Servo;
 @Config
 public class ShooterIO {
 
+    /// ================= SHOOTER =================
+    private final DcMotorEx shooterUp, shooterDown;
 
-    private final HardwareMap hwMap;
-
-    /// SHOOTER
-    private DcMotorEx shooterUp, shooterDown;
     private double targetVelocity = 0.0;
-    private static final double VELOCITY_TOLERANCE = 50.0;
-    public static PIDFCoefficients shooterCoeffs = new PIDFCoefficients(
-            1, 10, 0.000001, 0.0
-    );
+    private static final double VELOCITY_TOLERANCE = 75.0;
 
-    ///  YAW
-    private Servo leftServo, rightServo;
+    // Ajustables desde Dashboard
+    public static PIDFCoefficients shooterCoeffs =
+            new PIDFCoefficients(60, 0, 6, 13); // valores típicos para flywheel FTC
+
+    /// ================= YAW =================
+    private final Servo leftServo, rightServo;
     public static double posMin = 0.0;
     public static double posMax = 1.0;
     public static double maxAngleDeg = 60.0;
-    private double currentPos = 0.5;
+
     private double currentAngleDeg = 0.0;
 
-    ///  HOOD
-    private Servo hood;
+    /// ================= HOOD =================
+    private final Servo hood;
 
-    public  ShooterIO (HardwareMap hwMap) {
-        this.hwMap = hwMap;
+    public ShooterIO(HardwareMap hwMap) {
 
-        ///Shooter
+        // ---- Shooter motors ----
         shooterUp   = hwMap.get(DcMotorEx.class, "launcherTop");
         shooterDown = hwMap.get(DcMotorEx.class, "launcherBottom");
-        shooterUp.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooterDown.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooterUp.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, shooterCoeffs);
-        shooterDown.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, shooterCoeffs);
+
+        shooterUp.setDirection(DcMotorSimple.Direction.FORWARD);
         shooterDown.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        ///Yaw
+        shooterUp.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        shooterDown.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
+        shooterUp.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shooterDown.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        shooterUp.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, shooterCoeffs);
+        shooterDown.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, shooterCoeffs);
+
+        // ---- Yaw ----
         leftServo  = hwMap.get(Servo.class, "yawLeft");
         rightServo = hwMap.get(Servo.class, "yawRight");
 
-        ///Hood
+        // ---- Hood ----
         hood = hwMap.get(Servo.class, "hood");
-
     }
 
-    /// YAW ///
-    public void setYaw(double angleDeg){
+    // ================= YAW =================
 
+    public void setYaw(double angleDeg) {
         double clamped = clampAngle(angleDeg);
         currentAngleDeg = clamped;
 
-        // Convertir ángulo a posición servo
         double pos = angleToServoPos(clamped);
-        currentPos = pos;
-
         leftServo.setPosition(pos);
         rightServo.setPosition(pos);
-
     }
 
     public double getYaw() {
@@ -84,40 +84,53 @@ public class ShooterIO {
         return posMin + t * (posMax - posMin);
     }
 
+    // ================= HOOD =================
 
-    /// HOOD ///
-    public void setHood(double pos){
+    public void setHood(double pos) {
         hood.setPosition(pos);
     }
 
-    public double getHood(){
+    public double getHood() {
         return hood.getPosition();
     }
 
+    // ================= SHOOTER =================
 
-    /// SHOOTER ///
-    public void setVel(){
+    /** Setea la referencia */
+    public void setPoint(double velocityTicksPerSec) {
+        targetVelocity = velocityTicksPerSec;
+    }
+
+    /** Aplica la referencia (llamar en loop / Action) */
+    public void setVel() {
         shooterUp.setVelocity(targetVelocity);
         shooterDown.setVelocity(targetVelocity);
     }
 
-    public void setPoint(double setPoint){
-        targetVelocity = setPoint;
+    public void stop() {
+        shooterUp.setVelocity(0);
+        shooterDown.setVelocity(0);
+        targetVelocity = 0;
     }
 
-
     public double getVelocity() {
-        return (shooterUp.getVelocity() + shooterDown.getVelocity()) / 2;
+        return (shooterUp.getVelocity() + shooterDown.getVelocity()) / 2.0;
     }
 
     public boolean atVelocity() {
-        return Math.abs(getVelocity() - targetVelocity) < VELOCITY_TOLERANCE;
+        return Math.abs(getVelocity() - targetVelocity) <= VELOCITY_TOLERANCE;
     }
 
-    public void setPwr (double power){
+    /** Solo para testing manual
+    public void setPwr(double power) {
         shooterUp.setPower(power);
         shooterDown.setPower(power);
+    }*/
+    public void setPwr(double power) {
+        shooterUp.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        shooterDown.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        shooterUp.setPower(power);
+        shooterDown.setPower(power);
     }
-
 }
