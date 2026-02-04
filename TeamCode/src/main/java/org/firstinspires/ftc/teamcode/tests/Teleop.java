@@ -24,9 +24,8 @@ public class Teleop extends OpMode {
 
     private enum ShootRoutineState {
         IDLE,
-        WAIT_READY,    // Waiting for velocity to reach target (first ball only)
-        FEEDING,       // Actively feeding a ball
-        WAIT_RECOVERY  // Waiting for velocity to recover after shot
+        WAIT_READY,    // Waiting for velocity to reach target
+        FEEDING        // Actively feeding the ball
     }
 
     private ShootRoutineState shootState = ShootRoutineState.IDLE;
@@ -34,15 +33,14 @@ public class Teleop extends OpMode {
 
     private boolean shooterOn = false;
     private boolean lastLB = false;
+    private boolean lastRB = false;
 
     // Ajustables desde Dashboard
     public static double SHOOT_READY_VEL = 550;
     public static double VEL_TOLERANCE = 20; // Tolerance below target velocity
-    public static double SECOND_BALL_BONUS = 50; // Extra velocity needed for second ball
     public static double MIN_FEED_TIME = 0.3; // Minimum time to ensure ball is fed
-    public static int MAX_SHOTS = 3; // Number of balls to shoot
-
-    private int shotCount = 0;
+    public static double MAX_FEED_TIME = 3.0; // Maximum time before timeout
+    public static double MANUAL_INTAKE_POWER = 0.7; // Power for manual intake/index
 
     @Override
     public void init() {
@@ -75,17 +73,21 @@ public class Teleop extends OpMode {
                 new PoseVelocity2d(new Vector2d(rotatedX, rotatedY), turn)
         );
 
+        // ================= MANUAL INTAKE/INDEX CONTROL =================
+
+        boolean rb = gamepad1.right_bumper;
+
         // ================= START SHOOT ROUTINE =================
 
         boolean lb = gamepad1.left_bumper;
 
         if (lb && !lastLB && shootState == ShootRoutineState.IDLE) {
             shooterOn = true;
-            shotCount = 0;
             shootState = ShootRoutineState.WAIT_READY;
         }
 
         lastLB = lb;
+        lastRB = rb;
 
         // ================= SHOOTER POWER =================
 
@@ -94,30 +96,26 @@ public class Teleop extends OpMode {
         // ================= SHOOT STATE MACHINE =================
 
         double currentVel = shooterIO.getVelocity();
-
-        // Determine threshold based on which ball we're shooting
-        double threshold;
-        if (shotCount == 1) {
-            // Second ball needs higher velocity (target + 30)
-            threshold = SHOOT_READY_VEL + SECOND_BALL_BONUS;
-        } else {
-            // First and third balls use normal threshold (target - 20)
-            threshold = SHOOT_READY_VEL - VEL_TOLERANCE;
-        }
+        double threshold = SHOOT_READY_VEL - VEL_TOLERANCE;
 
         switch (shootState) {
 
             case IDLE:
-                intakeIO.setPwrIntake(0.0);
-                intakeIO.setPwrIndex(0.0);
-                shotCount = 0;
+                // Manual control with right bumper when not shooting
+                if (rb) {
+                    intakeIO.setPwrIntake(MANUAL_INTAKE_POWER);
+                    intakeIO.setPwrIndex(MANUAL_INTAKE_POWER);
+                } else {
+                    intakeIO.setPwrIntake(0.0);
+                    intakeIO.setPwrIndex(0.0);
+                }
                 break;
 
             case WAIT_READY:
                 intakeIO.setPwrIntake(0.0);
                 intakeIO.setPwrIndex(0.0);
 
-                // Wait for velocity to reach threshold
+                // Wait for velocity to reach threshold (target - 20)
                 if (currentVel >= threshold) {
                     feedTimer.reset();
                     shootState = ShootRoutineState.FEEDING;
@@ -125,8 +123,8 @@ public class Teleop extends OpMode {
                 break;
 
             case FEEDING:
-                // Feed ball while velocity is above threshold
-                if (currentVel >= threshold) {
+                // Only feed while velocity is within range (threshold to target)
+                if (currentVel >= threshold && currentVel <= SHOOT_READY_VEL) {
                     intakeIO.setPwrIntake(1.0);
                     intakeIO.setPwrIndex(1.0);
                 } else {
@@ -134,33 +132,20 @@ public class Teleop extends OpMode {
                     intakeIO.setPwrIndex(0.0);
                 }
 
-                // Once velocity drops below threshold AND minimum feed time has passed
+                // Once velocity drops below threshold AND minimum feed time has passed, shot is complete
                 if (currentVel < threshold && feedTimer.seconds() >= MIN_FEED_TIME) {
                     intakeIO.setPwrIntake(0.0);
                     intakeIO.setPwrIndex(0.0);
-                    shotCount++;
-                    shootState = ShootRoutineState.WAIT_RECOVERY;
-                }
-                break;
-
-            case WAIT_RECOVERY:
-                intakeIO.setPwrIntake(0.0);
-                intakeIO.setPwrIndex(0.0);
-
-                // Check if we've shot all balls first
-                if (shotCount >= MAX_SHOTS) {
                     shooterOn = false;
                     shootState = ShootRoutineState.IDLE;
-                    // Explicitly stop everything
+                }
+
+                // Timeout: if feeding for too long without detecting a shot, stop
+                if (feedTimer.seconds() >= MAX_FEED_TIME) {
                     intakeIO.setPwrIntake(0.0);
                     intakeIO.setPwrIndex(0.0);
-                    shooterIO.setPwr(0.0);
-                }
-                // Wait for velocity to recover to threshold for next ball
-                else if (currentVel >= threshold) {
-                    // Go directly to FEEDING for subsequent balls
-                    feedTimer.reset();
-                    shootState = ShootRoutineState.FEEDING;
+                    shooterOn = false;
+                    shootState = ShootRoutineState.IDLE;
                 }
                 break;
         }
@@ -168,11 +153,12 @@ public class Teleop extends OpMode {
         // ================= TELEMETRY =================
 
         telemetry.addData("Shoot State", shootState);
-        telemetry.addData("Shot Count", shotCount);
         telemetry.addData("Shooter Vel", currentVel);
-        telemetry.addData("Current Threshold", threshold);
+        telemetry.addData("Threshold", threshold);
+        telemetry.addData("Target Vel", SHOOT_READY_VEL);
         telemetry.addData("Feed Time", feedTimer.seconds());
         telemetry.addData("Shooter On", shooterOn);
+        telemetry.addData("Manual Intake (RB)", rb);
         telemetry.update();
     }
 
