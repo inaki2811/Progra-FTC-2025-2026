@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems.Intake;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -100,36 +102,36 @@ public class Intake {
                                  double MIN_FEED_TIME,
                                  double MAX_FEED_TIME) {
 
+
         // Creamos un timer específico para esta acción
         ElapsedTime feedTimer = new ElapsedTime();
         feedTimer.reset();
 
         return packet -> {
-            // Solo alimentar si shooter está "ready" y velocidad en rango
-            if (shooterReady.getAsBoolean()
-                    && currentVel.getAsDouble() >= threshold
-                    && currentVel.getAsDouble() <= SHOOT_READY_VEL) {
+            double vel = currentVel.getAsDouble();
+            boolean ready = shooterReady.getAsBoolean();
+
+            telemetry.addData("ShooterReady", ready);
+            telemetry.addData("ShooterVel", vel);
+            telemetry.update();
+
+            if (ready && vel >= threshold) { // solo pide que supere el umbral
                 intakeWithIndex();
             } else {
                 stopIntake();
             }
 
-            // Condición de disparo completo
-            if (currentVel.getAsDouble() < threshold
-                    && feedTimer.seconds() >= MIN_FEED_TIME) {
+            if (vel < threshold && feedTimer.seconds() >= MIN_FEED_TIME) {
                 stopIntake();
-                // aquí podrías apagar shooter o cambiar estado
-                return true; // acción terminada
+                return true;
             }
 
-            // Timeout de seguridad
             if (feedTimer.seconds() >= MAX_FEED_TIME) {
                 stopIntake();
-                // aquí también podrías apagar shooter o cambiar estado
-                return true; // acción terminada
+                return true;
             }
 
-            return false; // acción sigue activa
+            return false;
         };
     }
 
