@@ -52,12 +52,12 @@ public class AutonomousBlue extends LinearOpMode {
                 .strafeToLinearHeading(new Vector2d(-13, -22), -Math.PI / 2)
                 .build();
 
-        Action traj2 = drive.actionBuilder(startPose)
+        Action traj2 = drive.actionBuilder(drive.localizer.getPose())
                 .strafeToConstantHeading(new Vector2d(-11.6, -50) )
                 .strafeToLinearHeading(new Vector2d(-20,-22), Math.atan2(distanceWithTargetYManual(1,-22),distanceWithTargetXManual(20)))
                 .build();
 
-        Action traj3 = drive.actionBuilder(startPose)
+        Action traj3 = drive.actionBuilder(drive.localizer.getPose())
                 .strafeToLinearHeading(new Vector2d(12.2,-22), Math.PI / 2)
                 .strafeToConstantHeading(new Vector2d(12.2, -50))
                 .strafeToLinearHeading(new Vector2d(-20,-22), Math.atan2(distanceWithTargetYManual(1,-22),distanceWithTargetXManual(20)))

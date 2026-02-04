@@ -135,6 +135,8 @@ public class Teleop extends OpMode {
 
         }
 
+        TelemetryPacket packet = new TelemetryPacket();
+        subsystemManager.periodic(packet);
 
 
         // === TELEMETRÍA ===
