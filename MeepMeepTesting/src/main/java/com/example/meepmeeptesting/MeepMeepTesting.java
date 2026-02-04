@@ -28,36 +28,21 @@ public class MeepMeepTesting {
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 16)
                 .followTrajectorySequence(drive -> drive.trajectorySequenceBuilder(new Pose2d(-70+8, -46.6 + 7.4,  -Math.PI / 2))
-                        
-                        // Disparo de precargadas
-                        // Mirar el patron
-                        // Activar Intake
-                        .waitSeconds(4)
 
-                        .strafeTo(new Vector2d(GPP_POS, 28 + 3)) // GPP
-                        .forward(18) // recoger
-                        // preparar disparo
-                        .strafeTo(new Vector2d(49.7, 17.4)) // GPP
-                        .waitSeconds(4)
 
-                        .strafeTo(new Vector2d(PGP_POS, 28 + 3)) // PGP
-                        .forward(18) // recoger
-                        // preparar disparo
-                        .strafeTo(new Vector2d(-7.9, 19.9)) // PGP
-                        .waitSeconds(4)
-
-                        .strafeTo(new Vector2d(PPG_POS, 28 + 3)) // PPG
-                        .forward(18) // recoger
-                        // preparar disparo
-                        .strafeTo(new Vector2d(-36.3, 31.5)) // PPG
-                        .waitSeconds(4)
+                .strafeTo(new Vector2d(-13, -22))
+                .waitSeconds(3)
+                .strafeTo(new Vector2d(-11.6, -50) )
+                .strafeTo(new Vector2d(-20,-22))
+                .waitSeconds(3)
+                .strafeTo(new Vector2d(12.2,-22))
+                .strafeTo(new Vector2d(12.2, -50))
+                .strafeTo(new Vector2d(-20,-22))
+                .build());
 
 
 
-
-                        // Disparar
-
-                        .build());
+        // Espera al inicio del opmode
 
 
         Image img = null;

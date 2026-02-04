@@ -43,9 +43,14 @@ public class Shoot {
         shooterIO.setPoint(velocity + velOffset);
         shooterIO.setVel();
     }
+    public double getVel () {
+        return getVel();
+    }
+
+
 
     public boolean atVelocity() {
-        return Math.abs(shooterIO.getVelocity() - targetVelocity) < 50;
+        return Math.abs(shooterIO.getVelocity() - targetVelocity) < 20;
     }
 
     public Action spinUp(double velocity) {
@@ -57,7 +62,7 @@ public class Shoot {
 
     public Action stop() {
         return packet -> {
-            setVel(0);
+            shooterIO.setPwr(0);
             return true;
         };
     }
@@ -66,11 +71,10 @@ public class Shoot {
         return packet -> {
             double distance = getDistance();
 
-            if (distance < 59.0) {
-                setVel(600);
-            } else {
-                setVel(700);
-            }
+
+
+                shooterIO.setPwr(1);
+
 
             return atVelocity(); // termina cuando ya está listo
         };

@@ -17,7 +17,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VisionIO {
+public class VisionIO{
     private static final boolean USE_WEBCAM = true;
 
     private final VisionPortal visionPortal;

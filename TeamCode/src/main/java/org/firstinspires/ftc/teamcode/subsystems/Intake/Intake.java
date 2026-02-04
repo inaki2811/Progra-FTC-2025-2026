@@ -5,7 +5,9 @@ import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import java.util.Timer;
 import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 
 public class Intake {
     private final IntakeIO io;
@@ -89,15 +91,45 @@ public class Intake {
         };
     }
 
-    // shootea cuando ya esta listo el shooter
-    public Action shootWhenReady(BooleanSupplier shooterReady) {
+
+
+    public Action shootWhenReady(BooleanSupplier shooterReady,
+                                 DoubleSupplier currentVel,
+                                 double threshold,
+                                 double SHOOT_READY_VEL,
+                                 double MIN_FEED_TIME,
+                                 double MAX_FEED_TIME) {
+
+        // Creamos un timer específico para esta acción
+        ElapsedTime feedTimer = new ElapsedTime();
+        feedTimer.reset();
+
         return packet -> {
-            if (shooterReady.getAsBoolean() ) {
+            // Solo alimentar si shooter está "ready" y velocidad en rango
+            if (shooterReady.getAsBoolean()
+                    && currentVel.getAsDouble() >= threshold
+                    && currentVel.getAsDouble() <= SHOOT_READY_VEL) {
                 intakeWithIndex();
             } else {
                 stopIntake();
             }
-            return false;
+
+            // Condición de disparo completo
+            if (currentVel.getAsDouble() < threshold
+                    && feedTimer.seconds() >= MIN_FEED_TIME) {
+                stopIntake();
+                // aquí podrías apagar shooter o cambiar estado
+                return true; // acción terminada
+            }
+
+            // Timeout de seguridad
+            if (feedTimer.seconds() >= MAX_FEED_TIME) {
+                stopIntake();
+                // aquí también podrías apagar shooter o cambiar estado
+                return true; // acción terminada
+            }
+
+            return false; // acción sigue activa
         };
     }
 

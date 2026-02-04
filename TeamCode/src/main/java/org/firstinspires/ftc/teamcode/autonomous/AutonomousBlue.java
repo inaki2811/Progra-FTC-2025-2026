@@ -24,7 +24,6 @@ public class AutonomousBlue extends LinearOpMode {
     private static final double PGP_POS = 12.2;
     private static final double GPP_POS = 36;
     public static Supplier<Pose2d> lastPose = () -> new Pose2d(-70, -59,  -Math.PI / 2);
-    private VisionIO vision;
     private Intake intake;
 
     @Override

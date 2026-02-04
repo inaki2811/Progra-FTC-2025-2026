@@ -84,7 +84,14 @@ public class SubsystemManager {
                                     shooter.trackingYaw(),
                                     shooter.trackingHood()
                             ),
-                            intake.shootWhenReady(shooter::atVelocity)
+                            intake.shootWhenReady(
+                                    shooter::atVelocity,
+                                    shooter::getVel,
+                                    530,
+                                    550,
+                                    0.3,
+                                    3.0
+                            )
                             );
                     break;
 
