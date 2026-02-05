@@ -21,7 +21,6 @@ public class IntakeIO {
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
         index = hardwareMap.get(DcMotorEx.class, "index");
-        index.setDirection(DcMotorSimple.Direction.REVERSE);
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         index.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }

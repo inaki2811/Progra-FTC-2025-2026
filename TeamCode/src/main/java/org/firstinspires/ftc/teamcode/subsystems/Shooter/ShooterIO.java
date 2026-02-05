@@ -35,7 +35,7 @@ public class ShooterIO {
     public ShooterIO(HardwareMap hwMap) {
 
         // ---- Shooter motors ----
-        shooterUp   = hwMap.get(DcMotorEx.class, "launcherTop");
+        shooterUp = hwMap.get(DcMotorEx.class, "launcherTop");
         shooterDown = hwMap.get(DcMotorEx.class, "launcherBottom");
 
         shooterUp.setDirection(DcMotorSimple.Direction.FORWARD);

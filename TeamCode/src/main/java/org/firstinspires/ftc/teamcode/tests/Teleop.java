@@ -7,8 +7,6 @@ import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-
 import org.firstinspires.ftc.teamcode.core.RobotState;
 import org.firstinspires.ftc.teamcode.core.SubsystemManager;
 import org.firstinspires.ftc.teamcode.subsystems.Intake.IntakeIO;
@@ -54,6 +52,10 @@ public class Teleop extends OpMode {
 
     @Override
     public void loop() {
+        TelemetryPacket packet = new TelemetryPacket();
+        subsystemManager.periodic(packet);
+
+
 
         // === DETECCIÓN DE ALIANZA ===
 
@@ -134,9 +136,6 @@ public class Teleop extends OpMode {
             vision.close();
 
         }
-
-        TelemetryPacket packet = new TelemetryPacket();
-        subsystemManager.periodic(packet);
 
 
         // === TELEMETRÍA ===

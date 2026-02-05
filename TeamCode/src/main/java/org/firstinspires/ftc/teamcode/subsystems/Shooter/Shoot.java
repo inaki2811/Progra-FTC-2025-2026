@@ -75,12 +75,15 @@ public class Shoot {
 
                 shooterIO.setPwr(1);
 
+                double currrentVel = shooterIO.getVelocity();
+                boolean ready = atVelocity();
+
                 telemetry.addData("Current Vel", shooterIO.getVelocity());
                 telemetry.addData("Target Vel", targetVelocity);
                 telemetry.addData("AtVelocity", atVelocity());
                 telemetry.update();
 
-            return atVelocity(); // termina cuando ya está listo
+            return ready; // termina cuando ya está listo
         };
     }
 
