@@ -93,7 +93,7 @@ public class Shoot {
                             - botYaw.get();
 
             shooterIO.setYaw(yaw);
-            return false; // corre continuamente
+            return atVelocity();
         };
     }
 
@@ -115,7 +115,7 @@ public class Shoot {
             }
 
             shooterIO.setHood(pitch);
-            return false;
+            return atVelocity();
         };
     }
 
