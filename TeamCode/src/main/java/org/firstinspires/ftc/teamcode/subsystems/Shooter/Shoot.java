@@ -18,9 +18,8 @@ public class Shoot {
     private double targetVelocity = 0;
     private double velOffset;
 
-    // Debug counters
-    private int prepareCallCount = 0;
-    private long prepareStartTime = 0;
+    // ✅ Flag para saber si ya iniciamos la preparación
+    private boolean preparationStarted = false;
 
     public Shoot(
             ShooterIO shooterIO,
@@ -53,9 +52,22 @@ public class Shoot {
     }
 
     public boolean atVelocity() {
+        // ✅ No puede estar listo si nunca se ha preparado
+        if (!preparationStarted) {
+            return false;
+        }
+
         double current = shooterIO.getVelocity();
         double delta = Math.abs(current - targetVelocity);
-        return delta < 20;
+        boolean ready = delta < 20;
+
+        telemetry.addData("atVelocity check", "");
+        telemetry.addData("  Current", String.format("%.1f", current));
+        telemetry.addData("  Target", targetVelocity);
+        telemetry.addData("  Delta", String.format("%.1f", delta));
+        telemetry.addData("  Ready", ready);
+
+        return ready;
     }
 
     public Action spinUp(double velocity) {
@@ -69,8 +81,7 @@ public class Shoot {
         return packet -> {
             targetVelocity = 0;
             shooterIO.setPwr(0);
-            prepareCallCount = 0;
-            prepareStartTime = 0;
+            preparationStarted = false; // ✅ Reset el flag
             telemetry.addData("🛑 Shooter", "STOPPED");
             return true;
         };
@@ -78,33 +89,29 @@ public class Shoot {
 
     public Action prepareVelocity() {
         return packet -> {
-            // Primera vez que se llama esta acción
-            if (prepareCallCount == 0) {
-                prepareStartTime = System.currentTimeMillis();
-            }
-            prepareCallCount++;
-
             double distance = getDistance();
+
+            // ✅ PRIMERO establecer el target
             targetVelocity = 550;
+            preparationStarted = true; // ✅ Marcar que ya empezamos
+
+            // ✅ LUEGO aplicar potencia
             shooterIO.setPwr(1);
 
+            // ✅ AHORA SÍ verificar si está listo
             double currentVel = shooterIO.getVelocity();
             boolean ready = atVelocity();
-            long elapsed = System.currentTimeMillis() - prepareStartTime;
 
             telemetry.addData("━━━━━ PREPARE VEL ━━━━━", "");
-            telemetry.addData("  Call Count", prepareCallCount);
-            telemetry.addData("  Elapsed (ms)", elapsed);
             telemetry.addData("  Distance", String.format("%.2f m", distance));
             telemetry.addData("  Current Vel", String.format("%.1f", currentVel));
             telemetry.addData("  Target Vel", targetVelocity);
             telemetry.addData("  Delta", String.format("%.1f", Math.abs(currentVel - targetVelocity)));
             telemetry.addData("  Ready", ready ? "✅ YES" : "❌ NO");
-            telemetry.addData("  Returning", ready);
 
             if (ready) {
-                telemetry.addData("🎯 VELOCITY READY!", "Moving to shoot");
-                prepareCallCount = 0; // Reset para próxima vez
+                telemetry.addData("🎯", "VELOCITY READY!");
+                preparationStarted = false; // ✅ Reset para próxima vez
             }
 
             return ready;
@@ -121,7 +128,7 @@ public class Shoot {
             shooterIO.setYaw(yaw);
 
             boolean ready = atVelocity();
-            telemetry.addData("  Yaw tracking", String.format("%.1f°", Math.toDegrees(yaw)));
+            telemetry.addData("  Yaw", String.format("%.1f°", Math.toDegrees(yaw)));
 
             return ready;
         };
@@ -145,7 +152,7 @@ public class Shoot {
             shooterIO.setHood(pitch);
 
             boolean ready = atVelocity();
-            telemetry.addData("  Hood pitch", String.format("%.2f", pitch));
+            telemetry.addData("  Hood", String.format("%.2f", pitch));
 
             return ready;
         };
