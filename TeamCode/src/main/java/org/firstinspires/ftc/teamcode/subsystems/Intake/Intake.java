@@ -52,7 +52,7 @@ public class Intake {
 
             if (!isBallDetected()){
                 intakeWithIndex();
-            }else{
+            }else if (isBallDetected()){
                 intakeWithoutIndex();
 
             }
@@ -119,16 +119,6 @@ public class Intake {
                 intakeWithIndex();
             } else {
                 stopIntake();
-            }
-
-            if (vel < threshold && feedTimer.seconds() >= MIN_FEED_TIME) {
-                stopIntake();
-                return true;
-            }
-
-            if (feedTimer.seconds() >= MAX_FEED_TIME) {
-                stopIntake();
-                return true;
             }
 
             return false;

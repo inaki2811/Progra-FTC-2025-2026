@@ -44,7 +44,7 @@ public class Shoot {
         shooterIO.setVel();
     }
     public double getVel () {
-        return getVel();
+        return shooterIO.getVelocity();
     }
 
 
@@ -71,10 +71,14 @@ public class Shoot {
         return packet -> {
             double distance = getDistance();
 
-
+                targetVelocity = 550;
 
                 shooterIO.setPwr(1);
 
+                telemetry.addData("Current Vel", shooterIO.getVelocity());
+                telemetry.addData("Target Vel", targetVelocity);
+                telemetry.addData("AtVelocity", atVelocity());
+                telemetry.update();
 
             return atVelocity(); // termina cuando ya está listo
         };

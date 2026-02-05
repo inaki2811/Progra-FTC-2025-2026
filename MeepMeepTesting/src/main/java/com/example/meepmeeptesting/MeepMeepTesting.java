@@ -4,7 +4,9 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 
 import org.rowlandhall.meepmeep.MeepMeep;
+import org.rowlandhall.meepmeep.core.colorscheme.scheme.ColorSchemeBlueDark;
 import org.rowlandhall.meepmeep.roadrunner.DefaultBotBuilder;
+import org.rowlandhall.meepmeep.roadrunner.DriveTrainType;
 import org.rowlandhall.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
 
 import java.awt.Image;
@@ -27,18 +29,38 @@ public class MeepMeepTesting {
         RoadRunnerBotEntity myBot = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 16)
+                .setDimensions(16,17)
+                .setColorScheme(new ColorSchemeBlueDark())
+                .setDriveTrainType(DriveTrainType.MECANUM)
                 .followTrajectorySequence(drive -> drive.trajectorySequenceBuilder(new Pose2d(-70+8, -46.6 + 7.4,  -Math.PI / 2))
 
 
                 .strafeTo(new Vector2d(-13, -22))
-                .waitSeconds(3)
+                .waitSeconds(3)/*
                 .strafeTo(new Vector2d(-11.6, -50) )
-                .strafeTo(new Vector2d(-20,-22))
-                .waitSeconds(3)
-                .strafeTo(new Vector2d(12.2,-22))
+                .strafeTo(new Vector2d(-13,-22))
+                .waitSeconds(3)*/
+                .strafeTo(new Vector2d(12.2,-28))
                 .strafeTo(new Vector2d(12.2, -50))
-                .strafeTo(new Vector2d(-20,-22))
-                .build());
+                .strafeTo(new Vector2d(-13,-22))
+                .turn( -Math.PI / 4)
+                        .strafeTo(new Vector2d(10,-57))
+                        .waitSeconds(0.5)
+                        .strafeTo(new Vector2d(-13,-22))
+                        .waitSeconds(3)
+                        .strafeTo(new Vector2d(10,-57))
+                        .waitSeconds(0.5)
+                        .strafeTo(new Vector2d(-13,-22))
+                        .waitSeconds(3)
+                        .strafeTo(new Vector2d(10,-57))
+                        .waitSeconds(0.5)
+                       .strafeTo(new Vector2d(-13,-22))
+                        .waitSeconds(3)
+
+
+
+
+                        .build());
 
 
 
