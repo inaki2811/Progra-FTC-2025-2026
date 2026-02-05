@@ -56,7 +56,9 @@ public class SubsystemManager {
      */
     public void periodic(TelemetryPacket telemetryPacket) {
         if (stateQueue.isEmpty()) {
+            telemetry.addData("━━━━━━━━━━━━━━━━━━", "");
             telemetry.addData("State", "IDLE");
+            telemetry.addData("━━━━━━━━━━━━━━━━━━", "");
             return;
         }
 
@@ -64,9 +66,12 @@ public class SubsystemManager {
 
         // Si entramos en un nuevo estado, inicializamos las Actions asociadas UNA VEZ
         if (cachedState != current) {
-            // limpiar cualquier action previa (por seguridad)
             runningAction = null;
             cachedState = current;
+
+            telemetry.addData("━━━━━━━━━━━━━━━━━━", "");
+            telemetry.addData("🔄 NEW STATE", current.name());
+            telemetry.addData("━━━━━━━━━━━━━━━━━━", "");
 
             switch (current) {
 
@@ -77,6 +82,7 @@ public class SubsystemManager {
                     break;
 
                 case SHOOT:
+                    telemetry.addData("Building SHOOT sequence...", "");
                     runningAction = new SequentialAction(
                             intake.stopIntake(),
                             new ParallelAction(
@@ -92,7 +98,7 @@ public class SubsystemManager {
                                     0.3,
                                     3.0
                             )
-                            );
+                    );
                     break;
 
                 case STOP:
@@ -107,16 +113,26 @@ public class SubsystemManager {
             }
         }
 
+        telemetry.addData("━━━━━━━━━━━━━━━━━━", "");
+        telemetry.addData("Current State", current.name());
+
         if (runningAction != null) {
             boolean finished = runningAction.run(telemetryPacket);
+
+            telemetry.addData("Action finished?", finished ? "✅ YES" : "❌ NO");
+
             if (finished) {
+                telemetry.addData("━━━━━━━━━━━━━━━━━━", "");
+                telemetry.addData("✅ STATE COMPLETED", current.name());
+                telemetry.addData("━━━━━━━━━━━━━━━━━━", "");
+
                 stateQueue.poll();
                 cachedState = null;
                 runningAction = null;
             }
         }
 
-        telemetry.addData("State", current.name());
+        telemetry.addData("━━━━━━━━━━━━━━━━━━", "");
     }
 
 }
