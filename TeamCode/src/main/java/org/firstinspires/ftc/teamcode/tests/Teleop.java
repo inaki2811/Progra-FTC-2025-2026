@@ -52,13 +52,7 @@ public class Teleop extends OpMode {
 
     @Override
     public void loop() {
-        TelemetryPacket packet = new TelemetryPacket();
-        subsystemManager.periodic(packet);
-
-
-
         // === DETECCIÓN DE ALIANZA ===
-
         vision.update();
 
         if (!allianceDecided) {
@@ -85,24 +79,21 @@ public class Teleop extends OpMode {
         }
 
         // === LECTURA DE STICKS y ACTUALIZA POSE===
-
         drive.updatePoseEstimate();
         Pose2d pose = drive.localizer.getPose();
-        double driveY = -gamepad1.left_stick_x;  // Adelante/Atrás
-        double driveX = -gamepad1.left_stick_y;  // Lateral
-        double turn   = -gamepad1.right_stick_x; // Rotación
+        double driveY = -gamepad1.left_stick_x;
+        double driveX = -gamepad1.left_stick_y;
+        double turn   = -gamepad1.right_stick_x;
 
         double heading = -pose.heading.toDouble() - Math.toRadians(180);
 
         // === CONVERSIÓN FIELD ORIENTED ===
-
         double rotatedX = driveX * Math.cos(heading) - driveY * Math.sin(heading);
         double rotatedY = driveX * Math.sin(heading) + driveY * Math.cos(heading);
 
         drive.setDrivePowers(new PoseVelocity2d(new Vector2d(rotatedX, rotatedY), turn));
 
         // === MAQUINA DE ESTADOS ===
-
         if (gamepad1.a && !alreadyPressedA) {
             subsystemManager.setState(RobotState.INTAKE);
             alreadyPressedA = true;
@@ -131,21 +122,21 @@ public class Teleop extends OpMode {
         if (gamepad1.dpad_left){
             vision.resume();
             VisionIO.Pose2dSimple vp = vision.getLastRobotPose();
-
         } else if (gamepad1.dpad_right) {
             vision.close();
-
         }
 
+        // ✅ MUEVE ESTO AQUÍ - DESPUÉS de cambiar estados
+        TelemetryPacket packet = new TelemetryPacket();
+        subsystemManager.periodic(packet);
 
         // === TELEMETRÍA ===
         telemetry.addData("Alliance decided", allianceDecided);
         telemetry.addData("Alliance", allianceDetector.getAlliance());
-        telemetry.addData("Estado:", RobotState.values());
         telemetry.addData("Pose X", pose.position.x);
         telemetry.addData("Pose Y", pose.position.y);
         telemetry.addData("Heading (deg)", Math.toDegrees(pose.heading.toDouble()));
-        telemetry.update();
+        telemetry.update(); // Esto ya incluye la telemetría del subsystemManager
     }
 
 
