@@ -27,40 +27,31 @@ public class MeepMeepTesting {
         MeepMeep meepMeep = new MeepMeep(800);
 
         RoadRunnerBotEntity myBot = new DefaultBotBuilder(meepMeep)
-                // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 16)
                 .setDimensions(16,17)
                 .setColorScheme(new ColorSchemeBlueDark())
                 .setDriveTrainType(DriveTrainType.MECANUM)
-                .followTrajectorySequence(drive -> drive.trajectorySequenceBuilder(new Pose2d(-70+8, -46.6 + 7.4,  -Math.PI / 2))
+                .followTrajectorySequence(drive ->
+                        drive.trajectorySequenceBuilder(new Pose2d(-62, -39, -Math.PI/2))
+                                .strafeTo(new Vector2d(-12, -22))
+                                .waitSeconds(3)
+                                .strafeTo(new Vector2d(-12, -50))//intakea
+                                .strafeTo(new Vector2d(-12, -22))
+                                .waitSeconds(3)
+                                .strafeTo(new Vector2d(12, -23))//intakea
+                                .strafeTo(new Vector2d(12, -50))
+                                .strafeTo(new Vector2d(-12, -22))
+                                .waitSeconds(3)
+                                .strafeTo(new Vector2d(35, -22))
+                                .strafeTo(new Vector2d(35, -50))//intakea
+                                .strafeTo(new Vector2d(-12, -22))
+                                .waitSeconds(3)
 
 
-                .strafeTo(new Vector2d(-13, -22))
-                .waitSeconds(3)/*
-                .strafeTo(new Vector2d(-11.6, -50) )
-                .strafeTo(new Vector2d(-13,-22))
-                .waitSeconds(3)*/
-                .strafeTo(new Vector2d(12.2,-28))
-                .strafeTo(new Vector2d(12.2, -50))
-                .strafeTo(new Vector2d(-13,-22))
-                .turn( -Math.PI / 4)
-                        .strafeTo(new Vector2d(10,-57))
-                        .waitSeconds(0.5)
-                        .strafeTo(new Vector2d(-13,-22))
-                        .waitSeconds(3)
-                        .strafeTo(new Vector2d(10,-57))
-                        .waitSeconds(0.5)
-                        .strafeTo(new Vector2d(-13,-22))
-                        .waitSeconds(3)
-                        .strafeTo(new Vector2d(10,-57))
-                        .waitSeconds(0.5)
-                       .strafeTo(new Vector2d(-13,-22))
-                        .waitSeconds(3)
+                                .waitSeconds(3)
 
-
-
-
-                        .build());
+                                .build()
+                );
 
 
 
@@ -76,5 +67,15 @@ public class MeepMeepTesting {
                 .setBackgroundAlpha(0.95f)
                 .addEntity(myBot)
                 .start();
+    }
+    private static double distanceWithTargetXManual(double x) {
+
+        double distance = ((-65 +  14.57) - x) * 0.0254;
+        return distance;
+    }
+
+    private static double distanceWithTargetYManual(double allianceMult, double y) {
+        double distance = ((59 + 15.35)  * allianceMult - (y)) * 0.0254;
+        return distance;
     }
 }
